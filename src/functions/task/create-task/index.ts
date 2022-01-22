@@ -1,15 +1,15 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { List } from "/opt/nodejs/list.model";
+import { Task } from "/opt/nodejs/task.model";
 import { genericErrorHandler } from "/opt/nodejs/util";
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const userId = event.pathParameters?.userId;
-  if (!userId) {
+  const listId = event.pathParameters?.listId;
+  if (!listId) {
     return {
       statusCode: 400,
-      body: "User ID is required",
+      body: "List ID is required",
     };
   }
   if (!event.body) {
@@ -18,9 +18,7 @@ export const handler = async (
       body: "Bad Request",
     };
   }
-
-  const { name, isDefault } = JSON.parse(event.body);
-
+  const { name, dueDate, desc } = JSON.parse(event.body);
   if (!name) {
     const response = {
       message: "Name is required",
@@ -32,10 +30,11 @@ export const handler = async (
     };
   }
 
-  const list = new List(name, userId, isDefault);
+  const task = new Task(listId, name, false, dueDate, desc);
+
   try {
-    const id = await list.save();
-    const response = { message: `List ${name} was created successfully`, id };
+    const id = await task.save();
+    const response = { message: `Task '${name}' was created successfully`, id };
     return {
       statusCode: 200,
       body: JSON.stringify(response),
@@ -43,7 +42,7 @@ export const handler = async (
   } catch (error) {
     return genericErrorHandler(
       error,
-      `An error occurred while creating the list ${name}`
+      `An error occurred while creating the task ${name}`
     );
   }
 };

@@ -23,7 +23,7 @@ export const create = async (user: UserDetails): Promise<string> => {
   };
 
   try {
-    await dynamoClient.put(params).promise();
+    await dynamoClient.put(params).promise(); // TODO why am I not returning the promise as with other functions
     return user.id;
   } catch (err: any) {
     if (err.code === "ConditionalCheckFailedException") {

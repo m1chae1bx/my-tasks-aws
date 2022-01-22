@@ -159,6 +159,24 @@ Resources:
           Properties:
             Method: DELETE
             Path: /users/{userId}/lists/{listId}
+  CreateTaskFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/task/create-task/
+      Description: A Lambda function that creates a task for the specified user
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: MyTasksTable
+      Layers:
+        - !Ref DynamoLayer
+        - !Ref TaskLayer
+        - !Ref GenericLayer
+      Events:
+        CreateUserApi:
+          Type: Api
+          Properties:
+            Method: POST
+            Path: /lists/{listId}/tasks
   DynamoLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -173,8 +191,18 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: ListLayer
-      Description: Dependency for DynamoDB related functions
+      Description: Dependency for List Model related functions
       ContentUri: layers/list-layer
+      CompatibleRuntimes:
+        - nodejs14.x
+    Metadata:
+      BuildMethod: nodejs14.x
+  TaskLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: TaskLayer
+      Description: Dependency for Task Model related functions
+      ContentUri: layers/task-layer
       CompatibleRuntimes:
         - nodejs14.x
     Metadata:

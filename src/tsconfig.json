@@ -5,6 +5,7 @@
       "/opt/nodejs/dynamo.config": ["src/layers/dynamo-layer/dynamo.config"],
       "/opt/nodejs/user.model": ["src/layers/user-layer/user.model"],
       "/opt/nodejs/list.model": ["src/layers/list-layer/list.model"],
+      "/opt/nodejs/task.model": ["src/layers/task-layer/task.model"],
       "/opt/nodejs/util": ["src/layers/generic-layer/util"]
     }
   }
