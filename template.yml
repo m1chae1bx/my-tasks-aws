@@ -16,6 +16,7 @@ Globals:
         MY_TASKS_TABLE:
           Ref: MyTasksTable
 Resources:
+  #### USER RELATED RESOURCES ####
   GetUserFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -105,6 +106,7 @@ Resources:
           Properties:
             Method: POST
             Path: /auth/signin
+  #### LIST RELATED RESOURCES ####
   CreateListFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -159,6 +161,7 @@ Resources:
           Properties:
             Method: DELETE
             Path: /users/{userId}/lists/{listId}
+  #### TASK RELATED RESOURCES ####
   CreateTaskFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -177,6 +180,25 @@ Resources:
           Properties:
             Method: POST
             Path: /lists/{listId}/tasks
+  GetTasksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/task/get-tasks/
+      Description: A Lambda function that gets the tasks of the specified list
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: MyTasksTable
+      Layers:
+        - !Ref DynamoLayer
+        - !Ref TaskLayer
+        - !Ref GenericLayer
+      Events:
+        CreateUserApi:
+          Type: Api
+          Properties:
+            Method: GET
+            Path: /lists/{listId}/tasks/
+  ### LAYERS ###
   DynamoLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:

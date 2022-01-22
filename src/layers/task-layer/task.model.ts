@@ -1,4 +1,8 @@
-import { create } from "./task.dao";
+import { APIGatewayProxyEventQueryStringParameters } from "aws-lambda";
+import { AWSError } from "aws-sdk";
+import { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { PromiseResult } from "aws-sdk/lib/request";
+import { create, getAll } from "./task.dao";
 
 export class Task {
   id?: string;
@@ -27,6 +31,13 @@ export class Task {
   save(): Promise<string> {
     return create(this);
   }
+
+  static getAll = async (
+    listId: string,
+    query: APIGatewayProxyEventQueryStringParameters | null
+  ): Promise<PromiseResult<DocumentClient.QueryOutput, AWSError>> => {
+    return getAll(listId, query);
+  };
 }
 
 // Task.prototype.create = function() {
@@ -55,7 +66,5 @@ export class Task {
 // Task.prototype.delete = function() {
 //   return TaskDao.delete(this.id, this.listId);
 // }
-
-// Task.getAllByList = (listId, query) => TaskDao.getAllByList(listId, query);
 
 // module.exports = Task;

@@ -1,3 +1,7 @@
+import { APIGatewayProxyEventQueryStringParameters } from "aws-lambda";
+import { AWSError } from "aws-sdk";
+import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
+import { PromiseResult } from "aws-sdk/lib/request";
 import { Task } from "./task.model";
 import { dynamoClient, TABLE_NAME } from "/opt/nodejs/dynamo.config";
 import { uuid } from "/opt/nodejs/util";
@@ -48,64 +52,83 @@ export const create = async (task: Task): Promise<string> => {
     });
 };
 
-// exports.getAllByList = (listId, query) => {
-//   if (!listId) throw { message: "List ID is required" };
-//   if (!query.dueDate && query.today || query.dueDate && !query.today) {
-//     throw { message: "Due date and Today are required together" };
-//   }
+export const getAll = (
+  listId: string,
+  query: APIGatewayProxyEventQueryStringParameters | null
+): Promise<PromiseResult<DocumentClient.QueryOutput, AWSError>> => {
+  if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
+  if (
+    query &&
+    ((!query.dueDate && query.today) || (query.dueDate && !query.today))
+  ) {
+    throw { message: "Due date and Today are required together" };
+  }
 
-//   let filterExpression = "";
-//   const expressionAttributeNames = {
-//     "#SK": "SK",
-//     "#name": "name",
-//     "#desc": "desc"
-//   };
-//   const expressionAttributeValues = {
-//     ":PK": `LIST#${listId}`,
-//     ":SK": query.includeCompleted ? `TASK#` : `TASK#active#`
-//   };
-//   if (query.name) {
-//     filterExpression = "contains(nameSearch, :name)";
-//     expressionAttributeValues[":name"] = query.name.toLowerCase();
-//   }
-//   if (query.dueDate) {
-//     var date = new Date(query.today);
-//     const dueDate = query.dueDate;
-//     if (filterExpression) filterExpression += " and ";
-//     if (dueDate === 'today') {
-//       filterExpression += "dueDate = :dueDate";
-//       expressionAttributeValues[":dueDate"] = date.toISOString();
-//     } else if (dueDate === 'tomorrow') {
-//       date.setDate(date.getDate() + 1);
-//       filterExpression += "dueDate = :dueDate";
-//       expressionAttributeValues[":dueDate"] = date.toISOString();
-//     } else if (dueDate === 'upcoming') {
-//       date.setDate(date.getDate() + 1);
-//       filterExpression += "dueDate > :dueDate";
-//       expressionAttributeValues[":dueDate"] = date.toISOString();
-//     } else if (dueDate === 'overdue') {
-//       filterExpression += "dueDate < :dueDate";
-//       expressionAttributeValues[":dueDate"] = date.toISOString();
-//     } else if (dueDate === 'unplanned') {
-//       filterExpression += "attribute_not_exists(dueDate)";
-//     }
-//   }
+  let filterExpression = "";
+  const expressionAttributeNames = {
+    "#SK": "SK",
+    "#name": "name",
+    "#desc": "desc",
+  };
+  const expressionAttributeValues: {
+    ":PK": string;
+    ":SK": string;
+    ":name"?: string;
+    ":dueDate"?: string;
+  } = {
+    ":PK": `LIST#${listId}`,
+    ":SK": query?.includeCompleted ? `TASK#` : `TASK#active#`,
+  };
+  if (query?.name) {
+    filterExpression = "contains(nameSearch, :name)";
+    expressionAttributeValues[":name"] = query.name.toLowerCase();
+  }
+  if (query?.dueDate && query?.today) {
+    const date = new Date(query.today);
+    const dueDate = query.dueDate;
+    if (filterExpression) filterExpression += " and ";
+    if (dueDate === "today") {
+      filterExpression += "dueDate = :dueDate";
+      expressionAttributeValues[":dueDate"] = date.toISOString();
+    } else if (dueDate === "tomorrow") {
+      date.setDate(date.getDate() + 1);
+      filterExpression += "dueDate = :dueDate";
+      expressionAttributeValues[":dueDate"] = date.toISOString();
+    } else if (dueDate === "upcoming") {
+      date.setDate(date.getDate() + 1);
+      filterExpression += "dueDate > :dueDate";
+      expressionAttributeValues[":dueDate"] = date.toISOString();
+    } else if (dueDate === "overdue") {
+      filterExpression += "dueDate < :dueDate";
+      expressionAttributeValues[":dueDate"] = date.toISOString();
+    } else if (dueDate === "unplanned") {
+      filterExpression += "attribute_not_exists(dueDate)";
+    }
+  }
 
-//   const params = {
-//     TableName: TABLE_NAME,
-//     KeyConditionExpression: "PK = :PK and begins_with(#SK, :SK)",
-//     ProjectionExpression: "id, #name, #desc, isCompleted, dueDate",
-//     ExpressionAttributeNames: expressionAttributeNames,
-//     ExpressionAttributeValues: expressionAttributeValues
-//   };
+  const params: DocumentClient.QueryInput = {
+    TableName: TABLE_NAME,
+    KeyConditionExpression: "PK = :PK and begins_with(#SK, :SK)",
+    ProjectionExpression: "id, #name, #desc, isCompleted, dueDate",
+    ExpressionAttributeNames: expressionAttributeNames,
+    ExpressionAttributeValues: expressionAttributeValues,
+  };
 
-//   if (filterExpression) params.FilterExpression = filterExpression;
+  if (filterExpression) params.FilterExpression = filterExpression;
 
-//   return dynamoClient.query(params).promise().then(data => data.Items.map(item => {
-//     item.listId = listId;
-//     return item;
-//   }));
-// }
+  return dynamoClient
+    .query(params)
+    .promise()
+    .then((data) => {
+      if (data.Items) {
+        data.Items.map((item) => {
+          item.listId = listId;
+          return item;
+        });
+      }
+      return data;
+    });
+};
 
 // exports.update = async task => {
 //   if (!task) throw { message: "Invalid task object" };
