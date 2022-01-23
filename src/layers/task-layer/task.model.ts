@@ -2,7 +2,7 @@ import { APIGatewayProxyEventQueryStringParameters } from "aws-lambda";
 import { AWSError } from "aws-sdk";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { PromiseResult } from "aws-sdk/lib/request";
-import { create, getAll, update } from "./task.dao";
+import { create, deleteTask, getAll, update } from "./task.dao";
 
 export class Task {
   id?: string;
@@ -54,33 +54,11 @@ export class Task {
   ): Promise<PromiseResult<DocumentClient.QueryOutput, AWSError>> => {
     return getAll(listId, query);
   };
+
+  static delete = async (
+    taskId: string,
+    listId: string
+  ): Promise<PromiseResult<DocumentClient.DeleteItemOutput, AWSError>> => {
+    return deleteTask(taskId, listId);
+  };
 }
-
-// Task.prototype.create = function() {
-//   const task = {
-//     name: this.name,
-//     listId: this.listId,
-//     isCompleted: this.isCompleted,
-//     dueDate: this.dueDate,
-//     desc: this.desc
-//   }
-//   return TaskDao.create(task);
-// }
-
-// Task.prototype.update = function() {
-//   const task = {
-//     id: this.id,
-//     listId: this.listId,
-//     name: this.name,
-//     isCompleted: this.isCompleted,
-//     dueDate: this.dueDate,
-//     desc: this.desc
-//   }
-//   return TaskDao.update(task);
-// }
-
-// Task.prototype.delete = function() {
-//   return TaskDao.delete(this.id, this.listId);
-// }
-
-// module.exports = Task;

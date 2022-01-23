@@ -216,6 +216,24 @@ Resources:
           Properties:
             Method: PUT
             Path: /lists/{listId}/tasks/{taskId}
+  DeleteTaskFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/task/delete-task/
+      Description: A Lambda function that deletes a task of the specified user
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: MyTasksTable
+      Layers:
+        - !Ref DynamoLayer
+        - !Ref TaskLayer
+        - !Ref GenericLayer
+      Events:
+        CreateUserApi:
+          Type: Api
+          Properties:
+            Method: DELETE
+            Path: /lists/{listId}/tasks/{taskId}
   ### LAYERS ###
   DynamoLayer:
     Type: AWS::Serverless::LayerVersion

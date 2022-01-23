@@ -227,33 +227,38 @@ export const update = async (
   }
 };
 
-// exports.delete = async (id, listId) => {
-//   if (!id) throw { message: "Task ID is required" };
-//   if (!listId) throw { message: "List ID is required" };
+export const deleteTask = async (
+  taskId: string,
+  listId: string
+): Promise<PromiseResult<DocumentClient.DeleteItemOutput, AWSError>> => {
+  if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
+  if (!taskId) throw { message: "Task ID is required" };
+  if (!listId) throw { message: "List ID is required" };
 
-//   const params = {
-//     TableName: TABLE_NAME,
-//     Key: {
-//       PK: `LIST#${listId}`,
-//       SK: `TASK#active#${id}`,
-//     },
-//     ConditionExpression: "attribute_exists(PK)",
-//   };
+  const params = {
+    TableName: TABLE_NAME,
+    Key: {
+      PK: `LIST#${listId}`,
+      SK: `TASK#active#${taskId}`,
+    },
+    ConditionExpression: "attribute_exists(PK)",
+  };
 
-//   try {
-//     return await dynamoClient.delete(params).promise();
-//   } catch (err) {
-//     if (err.code === "ConditionalCheckFailedException") {
-//       params.Key.SK = `TASK#${id}`;
-//       return dynamoClient
-//         .delete(params)
-//         .promise()
-//         .catch((err) => {
-//           if (err.code === "ConditionalCheckFailedException") {
-//             err.message = `Task ${id} of list ${listId} was not found`;
-//           }
-//           throw err;
-//         });
-//     }
-//   }
-// };
+  try {
+    return await dynamoClient.delete(params).promise();
+  } catch (error) {
+    if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
+      params.Key.SK = `TASK#${taskId}`;
+      return dynamoClient
+        .delete(params)
+        .promise()
+        .catch((error) => {
+          if (error.code === "ConditionalCheckFailedException") {
+            error.message = `Task ${taskId} of list ${listId} was not found`;
+          }
+          throw error;
+        });
+    }
+    throw error;
+  }
+};
