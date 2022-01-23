@@ -1,4 +1,4 @@
-import { uuid } from "/opt/nodejs/util";
+import { isAWSError, uuid } from "/opt/nodejs/util";
 import { dynamoClient, TABLE_NAME } from "/opt/nodejs/dynamo.config";
 import { List } from "./list.model";
 import { AWSError } from "aws-sdk";
@@ -53,16 +53,18 @@ export const create = async (
       ],
     };
 
-    return dynamoClient
-      .transactWrite(params)
-      .promise()
-      .then(() => id)
-      .catch((err) => {
-        if (err.code === "ConditionalCheckFailedException") {
-          err.message = `List ${id} is already existing`;
-        }
-        throw err;
-      });
+    try {
+      await dynamoClient.transactWrite(params).promise();
+      return id;
+    } catch (error) {
+      if (
+        isAWSError(error) &&
+        error.code === "ConditionalCheckFailedException"
+      ) {
+        error.message = `List ${id} is already existing`;
+      }
+      throw error;
+    }
   } else {
     const params = {
       TableName: TABLE_NAME,
@@ -75,16 +77,18 @@ export const create = async (
       ConditionExpression: "attribute_not_exists(PK)",
     };
 
-    return dynamoClient
-      .put(params)
-      .promise()
-      .then(() => id)
-      .catch((err) => {
-        if (err.code === "ConditionalCheckFailedException") {
-          err.message = `List ${id} is already existing`;
-        }
-        throw err;
-      });
+    try {
+      await dynamoClient.put(params).promise();
+      return id;
+    } catch (error) {
+      if (
+        isAWSError(error) &&
+        error.code === "ConditionalCheckFailedException"
+      ) {
+        error.message = `List ${id} is already existing`;
+      }
+      throw error;
+    }
   }
 };
 
@@ -105,15 +109,14 @@ export const deleteList = (
     ConditionExpression: "attribute_exists(PK)",
   };
 
-  return dynamoClient
-    .delete(params)
-    .promise()
-    .catch((err) => {
-      if (err.code === "ConditionalCheckFailedException") {
-        err.message = `List ${listId} of user ${userId} was not found`;
-      }
-      throw err;
-    });
+  try {
+    return dynamoClient.delete(params).promise();
+  } catch (error) {
+    if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
+      error.message = `List ${listId} of user ${userId} was not found`;
+    }
+    throw error;
+  }
 };
 
 export const getAll = async (

@@ -7,6 +7,7 @@ import {
   EMAIL_INDEX,
 } from "/opt/nodejs/dynamo.config";
 import { User, UserDetails } from "./user.model";
+import { isAWSError } from "/opt/nodejs/util";
 
 export const create = async (user: UserDetails): Promise<string> => {
   if (!user) throw { message: "Empty user object" };
@@ -25,11 +26,11 @@ export const create = async (user: UserDetails): Promise<string> => {
   try {
     await dynamoClient.put(params).promise(); // TODO why am I not returning the promise as with other functions
     return user.id;
-  } catch (err: any) {
-    if (err.code === "ConditionalCheckFailedException") {
-      err.message = `User ${user.id} is already existing`;
+  } catch (error) {
+    if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
+      error.message = `User ${user.id} is already existing`;
     }
-    throw err;
+    throw error;
   }
 };
 
@@ -50,15 +51,15 @@ export const deleteUser = async (
 
   try {
     return dynamoClient.delete(params).promise();
-  } catch (err: any) {
-    if (err.code === "ConditionalCheckFailedException") {
-      err.message = `User ${id} was not found`;
+  } catch (error) {
+    if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
+      error.message = `User ${id} was not found`;
     }
-    throw err;
+    throw error;
   }
 };
 
-export const patch = (
+export const patch = async (
   userPartial: Partial<User>
 ): Promise<PromiseResult<DocumentClient.UpdateItemOutput, AWSError>> => {
   if (!userPartial) throw { message: "Empty user object" };
@@ -104,18 +105,17 @@ export const patch = (
     ConditionExpression: "attribute_exists(PK)",
   };
 
-  return dynamoClient
-    .update(params)
-    .promise()
-    .catch((err) => {
-      if (err.code === "ConditionalCheckFailedException") {
-        err.message = `User ${id} was not found`;
-      }
-      if (err.code === "ValidationException") {
-        err.message = "Invalid user object";
-      }
-      throw err;
-    });
+  try {
+    return await dynamoClient.update(params).promise();
+  } catch (error) {
+    if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
+      error.message = `User ${id} was not found`;
+    }
+    if (isAWSError(error) && error.code === "ValidationException") {
+      error.message = "Invalid user object";
+    }
+    throw error;
+  }
 };
 
 export const get = async (

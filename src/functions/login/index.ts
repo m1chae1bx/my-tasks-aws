@@ -1,8 +1,6 @@
-// import { User } from "/opt/nodejs/user.model";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-// import { genericErrorHandler } from "/opt/nodejs/util";
-
 import { User } from "/opt/nodejs/user.model";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { genericErrorHandler } from "/opt/nodejs/util";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -41,11 +39,10 @@ export const handler = async (
       statusCode: 200,
       body: JSON.stringify({ token: user.generateJwt() }),
     };
-  } catch (err) {
-    // handle with generic error handler
-    return {
-      statusCode: 500,
-      body: JSON.stringify(err),
-    };
+  } catch (error) {
+    return genericErrorHandler(
+      error,
+      `An error occurred while logging in user ${id}`
+    );
   }
 };

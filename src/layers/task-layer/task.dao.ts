@@ -40,19 +40,18 @@ export const create = async (task: Task): Promise<string> => {
     ConditionExpression: "attribute_not_exists(PK)",
   };
 
-  return dynamoClient
-    .put(params)
-    .promise()
-    .then(() => id)
-    .catch((err) => {
-      if (err.code === "ConditionalCheckFailedException") {
-        err.message = `Task ${id} is already existing`;
-      }
-      throw err;
-    });
+  try {
+    await dynamoClient.put(params).promise();
+    return id;
+  } catch (error) {
+    if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
+      error.message = `Task ${id} is already existing`;
+    }
+    throw error;
+  }
 };
 
-export const getAll = (
+export const getAll = async (
   listId: string,
   query: APIGatewayProxyEventQueryStringParameters | null
 ): Promise<PromiseResult<DocumentClient.QueryOutput, AWSError>> => {
@@ -116,18 +115,14 @@ export const getAll = (
 
   if (filterExpression) params.FilterExpression = filterExpression;
 
-  return dynamoClient
-    .query(params)
-    .promise()
-    .then((data) => {
-      if (data.Items) {
-        data.Items.map((item) => {
-          item.listId = listId;
-          return item;
-        });
-      }
-      return data;
+  const data = await dynamoClient.query(params).promise();
+  if (data.Items) {
+    data.Items.map((item) => {
+      item.listId = listId;
+      return item;
     });
+  }
+  return data;
 };
 
 export const update = async (
@@ -212,15 +207,17 @@ export const update = async (
             },
           ],
         };
-        return dynamoClient
-          .transactWrite(params)
-          .promise()
-          .catch((error) => {
-            if (error.code === "ConditionalCheckFailedException") {
-              error.message = `Task ${id} of list ${listId} was not found`;
-            }
-            throw error;
-          });
+        try {
+          return await dynamoClient.transactWrite(params).promise();
+        } catch (error) {
+          if (
+            isAWSError(error) &&
+            error.code === "ConditionalCheckFailedException"
+          ) {
+            error.message = `Task ${id} of list ${listId} was not found`;
+          }
+          throw error;
+        }
       }
       throw error;
     }
@@ -249,15 +246,17 @@ export const deleteTask = async (
   } catch (error) {
     if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
       params.Key.SK = `TASK#${taskId}`;
-      return dynamoClient
-        .delete(params)
-        .promise()
-        .catch((error) => {
-          if (error.code === "ConditionalCheckFailedException") {
-            error.message = `Task ${taskId} of list ${listId} was not found`;
-          }
-          throw error;
-        });
+      try {
+        await dynamoClient.delete(params).promise();
+      } catch (error) {
+        if (
+          isAWSError(error) &&
+          error.code === "ConditionalCheckFailedException"
+        ) {
+          error.message = `Task ${taskId} of list ${listId} was not found`;
+        }
+        throw error;
+      }
     }
     throw error;
   }
