@@ -2,7 +2,7 @@ import { APIGatewayProxyEventQueryStringParameters } from "aws-lambda";
 import { AWSError } from "aws-sdk";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { PromiseResult } from "aws-sdk/lib/request";
-import { create, getAll } from "./task.dao";
+import { create, getAll, update } from "./task.dao";
 
 export class Task {
   id?: string;
@@ -30,6 +30,22 @@ export class Task {
 
   save(): Promise<string> {
     return create(this);
+  }
+
+  update(): Promise<
+    | PromiseResult<DocumentClient.TransactWriteItemsOutput, AWSError>
+    | PromiseResult<DocumentClient.PutItemOutput, AWSError>
+  > {
+    if (!this.id) throw { message: "Invalid task ID" };
+    const task = {
+      id: this.id,
+      listId: this.listId,
+      name: this.name,
+      isCompleted: this.isCompleted,
+      dueDate: this.dueDate,
+      desc: this.desc,
+    };
+    return update(task);
   }
 
   static getAll = async (

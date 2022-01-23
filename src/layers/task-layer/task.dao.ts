@@ -4,7 +4,7 @@ import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
 import { PromiseResult } from "aws-sdk/lib/request";
 import { Task } from "./task.model";
 import { dynamoClient, TABLE_NAME } from "/opt/nodejs/dynamo.config";
-import { uuid } from "/opt/nodejs/util";
+import { isAWSError, uuid } from "/opt/nodejs/util";
 
 export const create = async (task: Task): Promise<string> => {
   if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
@@ -130,92 +130,102 @@ export const getAll = (
     });
 };
 
-// exports.update = async task => {
-//   if (!task) throw { message: "Invalid task object" };
-//   if (!task.name) throw { message: "Name is required" };
+export const update = async (
+  task: Partial<Task>
+): Promise<
+  | PromiseResult<DocumentClient.TransactWriteItemsOutput, AWSError>
+  | PromiseResult<DocumentClient.PutItemOutput, AWSError>
+> => {
+  if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
+  if (!task) throw { message: "Invalid task object" };
+  if (!task.name) throw { message: "Name is required" };
 
-//   const id = task.id;
-//   const listId = task.listId;
-//   delete task.listId;
-//   task.nameSearch = task.name.toLowerCase();
+  const id = task.id;
+  const listId = task.listId;
+  delete task.listId;
 
-//   if (task.isCompleted) {
-//     const params = {
-//       TransactItems: [
-//         {
-//           Delete: {
-//             TableName: TABLE_NAME,
-//             Key: {
-//               PK: `LIST#${listId}`,
-//               SK: `TASK#active#${id}`
-//             }
-//           }
-//         },
-//         {
-//           Put: {
-//             TableName: TABLE_NAME,
-//             Item: {
-//               PK: `LIST#${listId}`,
-//               SK: `TASK#${id}`,
-//               ...task
-//             }
-//           }
-//         }
-//       ]
-//     };
+  if (task.isCompleted) {
+    const params = {
+      TransactItems: [
+        {
+          Delete: {
+            TableName: TABLE_NAME,
+            Key: {
+              PK: `LIST#${listId}`,
+              SK: `TASK#active#${id}`,
+            },
+          },
+        },
+        {
+          Put: {
+            TableName: TABLE_NAME,
+            Item: {
+              PK: `LIST#${listId}`,
+              SK: `TASK#${id}`,
+              nameSearch: task.name.toLowerCase(),
+              ...task,
+            },
+          },
+        },
+      ],
+    };
 
-//     return dynamoClient.transactWrite(params).promise();
-//   } else {
-//     const params = {
-//       TableName: TABLE_NAME,
-//       Item: {
-//         PK: `LIST#${listId}`,
-//         SK: `TASK#active#${id}`,
-//         ...task
-//       },
-//       ConditionExpression: "attribute_exists(PK)"
-//     };
+    return dynamoClient.transactWrite(params).promise();
+  } else {
+    const params = {
+      TableName: TABLE_NAME,
+      Item: {
+        PK: `LIST#${listId}`,
+        SK: `TASK#active#${id}`,
+        ...task,
+      },
+      ConditionExpression: "attribute_exists(PK)",
+    };
 
-//     try {
-//       return await dynamoClient.put(params).promise();
-//     } catch(err) {
-//       if (err.code === "ConditionalCheckFailedException") {
-//         const params = {
-//           TransactItems: [
-//             {
-//               Delete: {
-//                 TableName: TABLE_NAME,
-//                 Key: {
-//                   PK: `LIST#${listId}`,
-//                   SK: `TASK#${id}`
-//                 }
-//               }
-//             },
-//             {
-//               Put: {
-//                 TableName: TABLE_NAME,
-//                 Item: {
-//                   PK: `LIST#${listId}`,
-//                   SK: `TASK#active#${id}`,
-//                   ...task
-//                 }
-//               }
-//             }
-//           ]
-//         };
-//         return dynamoClient.transactWrite(params)
-//           .promise()
-//           .catch(err => {
-//             if (err.code === "ConditionalCheckFailedException") {
-//               err.message = `Task ${id} of list ${listId} was not found`;
-//             }
-//             throw err;
-//           });
-//       }
-//       throw err;
-//     }
-//   }
-// };
+    try {
+      return await dynamoClient.put(params).promise();
+    } catch (error) {
+      if (
+        isAWSError(error) &&
+        error.code === "ConditionalCheckFailedException"
+      ) {
+        const params = {
+          TransactItems: [
+            {
+              Delete: {
+                TableName: TABLE_NAME,
+                Key: {
+                  PK: `LIST#${listId}`,
+                  SK: `TASK#${id}`,
+                },
+              },
+            },
+            {
+              Put: {
+                TableName: TABLE_NAME,
+                Item: {
+                  PK: `LIST#${listId}`,
+                  SK: `TASK#active#${id}`,
+                  ...task,
+                },
+              },
+            },
+          ],
+        };
+        return dynamoClient
+          .transactWrite(params)
+          .promise()
+          .catch((error) => {
+            if (error.code === "ConditionalCheckFailedException") {
+              error.message = `Task ${id} of list ${listId} was not found`;
+            }
+            throw error;
+          });
+      }
+      throw error;
+    }
+  }
+};
 
 // exports.delete = async (id, listId) => {
 //   if (!id) throw { message: "Task ID is required" };
@@ -225,9 +235,9 @@ export const getAll = (
 //     TableName: TABLE_NAME,
 //     Key: {
 //       PK: `LIST#${listId}`,
-//       SK: `TASK#active#${id}`
+//       SK: `TASK#active#${id}`,
 //     },
-//     ConditionExpression: "attribute_exists(PK)"
+//     ConditionExpression: "attribute_exists(PK)",
 //   };
 
 //   try {
@@ -235,8 +245,10 @@ export const getAll = (
 //   } catch (err) {
 //     if (err.code === "ConditionalCheckFailedException") {
 //       params.Key.SK = `TASK#${id}`;
-//       return dynamoClient.delete(params).promise()
-//         .catch(err => {
+//       return dynamoClient
+//         .delete(params)
+//         .promise()
+//         .catch((err) => {
 //           if (err.code === "ConditionalCheckFailedException") {
 //             err.message = `Task ${id} of list ${listId} was not found`;
 //           }

@@ -198,6 +198,24 @@ Resources:
           Properties:
             Method: GET
             Path: /lists/{listId}/tasks/
+  UpdateTaskFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/task/update-task/
+      Description: A Lambda function that updates a task for the specified user
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: MyTasksTable
+      Layers:
+        - !Ref DynamoLayer
+        - !Ref TaskLayer
+        - !Ref GenericLayer
+      Events:
+        CreateUserApi:
+          Type: Api
+          Properties:
+            Method: PUT
+            Path: /lists/{listId}/tasks/{taskId}
   ### LAYERS ###
   DynamoLayer:
     Type: AWS::Serverless::LayerVersion
