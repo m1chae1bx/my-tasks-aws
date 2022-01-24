@@ -76,6 +76,12 @@ export class User implements UserDetails {
   }
 
   generateJwt(): string {
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error(
+        `JWT_SECRET environment variable is not set in Lambda function ${process.env.AWS_LAMBDA_FUNCTION_NAME}`
+      );
+    }
     const expiry = new Date();
     expiry.setDate(expiry.getDate() + 1);
     return jwt.sign(
@@ -84,8 +90,7 @@ export class User implements UserDetails {
         email: this.email,
         exp: expiry.getTime() / 1000,
       },
-      // process.env.JWT_SECRET
-      "secret"
+      jwtSecret
     );
   }
 
