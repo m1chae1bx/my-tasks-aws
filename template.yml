@@ -16,6 +16,15 @@ Globals:
         MY_TASKS_TABLE:
           Ref: MyTasksTable
 Resources:
+  MyTasksApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Auth:
+        DefaultAuthorizer: LambdaAuthorizer
+        Authorizers:
+          LambdaAuthorizer:
+            FunctionArn: !GetAtt LambdaAuthorizerFunction.Arn
   #### USER RELATED RESOURCES ####
   GetUserFunction:
     Type: AWS::Serverless::Function
@@ -33,6 +42,7 @@ Resources:
         GetUserApi:
           Type: Api
           Properties:
+            RestApiId: !Ref MyTasksApi
             Method: GET
             Path: /users/{userId}
   CreateUserFunction:
@@ -51,6 +61,7 @@ Resources:
         CreateUserApi:
           Type: Api
           Properties:
+            RestApiId: !Ref MyTasksApi
             Method: POST
             Path: /users
   PatchUserFunction:
@@ -69,6 +80,7 @@ Resources:
         CreateUserApi:
           Type: Api
           Properties:
+            RestApiId: !Ref MyTasksApi
             Method: PATCH
             Path: /users/{userId}
   DeleteUserFunction:
@@ -87,12 +99,19 @@ Resources:
         CreateUserApi:
           Type: Api
           Properties:
+            RestApiId: !Ref MyTasksApi
             Method: DELETE
             Path: /users/{userId}
+  ### AUTH RELATED RESOURCES ####
+  LambdaAuthorizerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/auth/lambda-authorizer/
+      Description: A Lambda function that checks if the user is authorized to access the API
   LoginFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/login/
+      CodeUri: functions/auth/login/
       Description: A Lambda function that logs in a user
       Policies:
         - DynamoDBCrudPolicy:
@@ -105,8 +124,11 @@ Resources:
         CreateUserApi:
           Type: Api
           Properties:
+            RestApiId: !Ref MyTasksApi
             Method: POST
             Path: /auth/signin
+            Auth:
+              Authorizer: NONE
   #### LIST RELATED RESOURCES ####
   CreateListFunction:
     Type: AWS::Serverless::Function
@@ -124,6 +146,7 @@ Resources:
         CreateUserApi:
           Type: Api
           Properties:
+            RestApiId: !Ref MyTasksApi
             Method: POST
             Path: /users/{userId}/lists
   GetListsFunction:
@@ -142,6 +165,7 @@ Resources:
         CreateUserApi:
           Type: Api
           Properties:
+            RestApiId: !Ref MyTasksApi
             Method: GET
             Path: /users/{userId}/lists/
   DeleteListFunction:
@@ -160,6 +184,7 @@ Resources:
         CreateUserApi:
           Type: Api
           Properties:
+            RestApiId: !Ref MyTasksApi
             Method: DELETE
             Path: /users/{userId}/lists/{listId}
   #### TASK RELATED RESOURCES ####
@@ -179,6 +204,7 @@ Resources:
         CreateUserApi:
           Type: Api
           Properties:
+            RestApiId: !Ref MyTasksApi
             Method: POST
             Path: /lists/{listId}/tasks
   GetTasksFunction:
@@ -197,6 +223,7 @@ Resources:
         CreateUserApi:
           Type: Api
           Properties:
+            RestApiId: !Ref MyTasksApi
             Method: GET
             Path: /lists/{listId}/tasks/
   UpdateTaskFunction:
@@ -215,6 +242,7 @@ Resources:
         CreateUserApi:
           Type: Api
           Properties:
+            RestApiId: !Ref MyTasksApi
             Method: PUT
             Path: /lists/{listId}/tasks/{taskId}
   DeleteTaskFunction:
@@ -233,6 +261,7 @@ Resources:
         CreateUserApi:
           Type: Api
           Properties:
+            RestApiId: !Ref MyTasksApi
             Method: DELETE
             Path: /lists/{listId}/tasks/{taskId}
   ### LAYERS ###
