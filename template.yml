@@ -14,11 +14,16 @@ Globals:
     Environment:
       Variables:
         MY_TASKS_TABLE: !Ref MyTasksTable
+Parameters:
+  StageName:
+    Type: String
+    Default: dev
 Resources:
   MyTasksApi:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: Prod
+      StageName: !Ref StageName
+      OpenApiVersion: "3.0.3"
       Auth:
         DefaultAuthorizer: LambdaAuthorizer
         Authorizers:

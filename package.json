@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "pre-build": "find ./src ! -path '*/node_modules/*' -name 'package.json' -execdir npm install \\;",
     "build": "tsc -p ./src && sam build -s ./src && find .aws-sam -name '*.ts' -type f|xargs rm -f && find src ! -path '*/node_modules/*' -name '*.js' -type f|xargs rm -f",
-    "deploy": "sam deploy",
+    "deploy-env": "sam deploy --config-env dev --parameter-overrides StageName=dev",
     "format": "npx prettier --write ."
   },
   "author": "",
