@@ -13,8 +13,7 @@ Globals:
     Handler: index.handler
     Environment:
       Variables:
-        MY_TASKS_TABLE:
-          Ref: MyTasksTable
+        MY_TASKS_TABLE: !Ref MyTasksTable
 Resources:
   MyTasksApi:
     Type: AWS::Serverless::Api
@@ -33,7 +32,7 @@ Resources:
       Description: A Lambda function that returns a user
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: MyTasksTable
+            TableName: !Ref MyTasksTable
       Layers:
         - !Ref DynamoLayer
         - !Ref UserLayer
@@ -52,7 +51,7 @@ Resources:
       Description: A Lambda function that creates a user
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: MyTasksTable
+            TableName: !Ref MyTasksTable
       Layers:
         - !Ref DynamoLayer
         - !Ref UserLayer
@@ -71,7 +70,7 @@ Resources:
       Description: A Lambda function that patches a user
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: MyTasksTable
+            TableName: !Ref MyTasksTable
       Layers:
         - !Ref DynamoLayer
         - !Ref UserLayer
@@ -90,7 +89,7 @@ Resources:
       Description: A Lambda function that delete a user
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: MyTasksTable
+            TableName: !Ref MyTasksTable
       Layers:
         - !Ref DynamoLayer
         - !Ref UserLayer
@@ -121,7 +120,7 @@ Resources:
           JWT_SECRET: ""
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: MyTasksTable
+            TableName: !Ref MyTasksTable
       Layers:
         - !Ref DynamoLayer
         - !Ref UserLayer
@@ -143,7 +142,7 @@ Resources:
       Description: A Lambda function that creates a list for the specified user
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: MyTasksTable
+            TableName: !Ref MyTasksTable
       Layers:
         - !Ref DynamoLayer
         - !Ref ListLayer
@@ -162,7 +161,7 @@ Resources:
       Description: A Lambda function that gets the lists of the specified user
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: MyTasksTable
+            TableName: !Ref MyTasksTable
       Layers:
         - !Ref DynamoLayer
         - !Ref ListLayer
@@ -181,7 +180,7 @@ Resources:
       Description: A Lambda function that delete a list of the specified user
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: MyTasksTable
+            TableName: !Ref MyTasksTable
       Layers:
         - !Ref DynamoLayer
         - !Ref ListLayer
@@ -201,7 +200,7 @@ Resources:
       Description: A Lambda function that creates a task for the specified user
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: MyTasksTable
+            TableName: !Ref MyTasksTable
       Layers:
         - !Ref DynamoLayer
         - !Ref TaskLayer
@@ -220,7 +219,7 @@ Resources:
       Description: A Lambda function that gets the tasks of the specified list
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: MyTasksTable
+            TableName: !Ref MyTasksTable
       Layers:
         - !Ref DynamoLayer
         - !Ref TaskLayer
@@ -239,7 +238,7 @@ Resources:
       Description: A Lambda function that updates a task for the specified user
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: MyTasksTable
+            TableName: !Ref MyTasksTable
       Layers:
         - !Ref DynamoLayer
         - !Ref TaskLayer
@@ -258,7 +257,7 @@ Resources:
       Description: A Lambda function that deletes a task of the specified user
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: MyTasksTable
+            TableName: !Ref MyTasksTable
       Layers:
         - !Ref DynamoLayer
         - !Ref TaskLayer
@@ -324,7 +323,6 @@ Resources:
   MyTasksTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: MyTasksTable
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: PK
