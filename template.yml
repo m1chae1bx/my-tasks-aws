@@ -304,7 +304,7 @@ Resources:
       CompatibleRuntimes:
         - nodejs14.x
     Metadata:
-      BuildMethod: makefile
+      BuildMethod: nodejs14.x
   GenericLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
