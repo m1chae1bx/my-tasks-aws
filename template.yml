@@ -108,11 +108,17 @@ Resources:
     Properties:
       CodeUri: functions/auth/lambda-authorizer/
       Description: A Lambda function that checks if the user is authorized to access the API
+      Environment:
+        Variables:
+          JWT_SECRET: ""
   LoginFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: functions/auth/login/
       Description: A Lambda function that logs in a user
+      Environment:
+        Variables:
+          JWT_SECRET: ""
       Policies:
         - DynamoDBCrudPolicy:
             TableName: MyTasksTable
