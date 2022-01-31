@@ -85,7 +85,7 @@ jobs:
       - run: npm install
       - run: npm run pre-build
       - run: npm run compile
-      - run: npm run build --template ${SAM_TEMPLATE} --use-container
+      - run: npm run build -- --template ${SAM_TEMPLATE} --use-container
       - run: npm run post-build
 
       - name: Assume the testing pipeline user role
