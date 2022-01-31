@@ -12,7 +12,7 @@ on:
 env:
   PIPELINE_USER_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   PIPELINE_USER_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  SAM_TEMPLATE: template.yaml
+  SAM_TEMPLATE: template.yml
   TESTING_STACK_NAME: my-tasks-app-integration
   TESTING_PIPELINE_EXECUTION_ROLE: arn:aws:iam::419488144524:role/aws-sam-cli-managed-integrat-PipelineExecutionRole-GYNXS8WK7HNK
   TESTING_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::419488144524:role/aws-sam-cli-managed-integ-CloudFormationExecutionR-199P0546A8GW0
