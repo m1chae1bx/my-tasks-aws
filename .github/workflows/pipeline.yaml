@@ -82,12 +82,6 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: "14"
-      - run: npm install
-      - run: npm run pre-build
-      - run: npm run compile
-      - run: npm run build -- --template ${SAM_TEMPLATE} --use-container
-      - run: npm run post-build
-
       - name: Assume the testing pipeline user role
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -98,7 +92,11 @@ jobs:
           role-session-name: feature-deployment
           role-duration-seconds: 3600
           role-skip-session-tagging: true
-
+      - run: npm install
+      - run: npm run pre-build
+      - run: npm run compile
+      - run: npm run build -- --template ${SAM_TEMPLATE} --use-container
+      - run: npm run post-build
       - name: Deploy to feature stack in the testing account
         shell: bash
         run: |
