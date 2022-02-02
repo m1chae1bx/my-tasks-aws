@@ -14,22 +14,14 @@ env:
   PIPELINE_USER_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   SAM_TEMPLATE: template.yml
   TESTING_STACK_NAME: my-tasks-app-integration
-  TESTING_PIPELINE_EXECUTION_ROLE: arn:aws:iam::419488144524:role/aws-sam-cli-managed-integrat-PipelineExecutionRole-GYNXS8WK7HNK
-  TESTING_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::419488144524:role/aws-sam-cli-managed-integ-CloudFormationExecutionR-199P0546A8GW0
-  TESTING_ARTIFACTS_BUCKET: aws-sam-cli-managed-integration-p-artifactsbucket-3nbo88alh520
-  # If there are functions with "Image" PackageType in your template,
-  # uncomment the line below and add "--image-repository ${TESTING_IMAGE_REPOSITORY}" to
-  # testing "sam package" and "sam deploy" commands.
-  # TESTING_IMAGE_REPOSITORY = '0123456789.dkr.ecr.region.amazonaws.com/repository-name'
+  TESTING_PIPELINE_EXECUTION_ROLE: arn:aws:iam::419488144524:role/aws-sam-cli-managed-integrat-PipelineExecutionRole-14PL6W4D02ORI
+  TESTING_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::419488144524:role/aws-sam-cli-managed-integ-CloudFormationExecutionR-19ZYE6FYGHLI7
+  TESTING_ARTIFACTS_BUCKET: aws-sam-cli-managed-integration-p-artifactsbucket-164yenun71c8r
   TESTING_REGION: ap-southeast-1
   PROD_STACK_NAME: my-tasks-app-prod
-  PROD_PIPELINE_EXECUTION_ROLE: arn:aws:iam::419488144524:role/aws-sam-cli-managed-prod-pip-PipelineExecutionRole-1EDD7DK0H74E5
-  PROD_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::419488144524:role/aws-sam-cli-managed-prod-CloudFormationExecutionR-6XVLLEW50N2Y
-  PROD_ARTIFACTS_BUCKET: aws-sam-cli-managed-prod-pipeline-artifactsbucket-19xkfl63h01d1
-  # If there are functions with "Image" PackageType in your template,
-  # uncomment the line below and add "--image-repository ${PROD_IMAGE_REPOSITORY}" to
-  # prod "sam package" and "sam deploy" commands.
-  # PROD_IMAGE_REPOSITORY = '0123456789.dkr.ecr.region.amazonaws.com/repository-name'
+  PROD_PIPELINE_EXECUTION_ROLE: arn:aws:iam::419488144524:role/aws-sam-cli-managed-prod-pip-PipelineExecutionRole-1LA5KMU02I7FB
+  PROD_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::419488144524:role/aws-sam-cli-managed-prod-CloudFormationExecutionR-14GF2W4D0N6XP
+  PROD_ARTIFACTS_BUCKET: aws-sam-cli-managed-prod-pipeline-artifactsbucket-1mq7akx6inr81
   PROD_REGION: ap-southeast-1
 
 jobs:
@@ -79,9 +71,13 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
       - uses: aws-actions/setup-sam@v1
-      - uses: actions/setup-node@v2
-        with:
-          node-version: "14"
+
+      - run: npm install
+      - run: npm run pre-build
+      - run: npm run compile
+      - run: npm run build -- --template ${SAM_TEMPLATE} --use-container
+      - run: npm run post-build
+
       - name: Assume the testing pipeline user role
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -92,21 +88,17 @@ jobs:
           role-session-name: feature-deployment
           role-duration-seconds: 3600
           role-skip-session-tagging: true
-      - run: npm install
-      - run: npm run pre-build
-      - run: npm run compile
-      - run: npm run build -- --template ${SAM_TEMPLATE} --use-container
-      - run: npm run post-build
+
       - name: Deploy to feature stack in the testing account
         shell: bash
         run: |
           sam deploy --stack-name $(echo ${GITHUB_REF##*/} | tr -cd '[a-zA-Z0-9-]') \
-            --no-confirm-changeset
             --capabilities CAPABILITY_IAM \
             --region ${TESTING_REGION} \
             --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
             --no-fail-on-empty-changeset \
-            --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE}
+            --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE} \
+            --no-confirm-changeset
 
   build-and-package:
     if: github.ref == 'refs/heads/main'
@@ -116,13 +108,11 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
       - uses: aws-actions/setup-sam@v1
-      - uses: actions/setup-node@v2
-        with:
-          node-version: "14"
+
       - run: npm install
       - run: npm run pre-build
       - run: npm run compile
-      - run: npm run build --template ${SAM_TEMPLATE} --use-container
+      - run: npm run build -- --template ${SAM_TEMPLATE} --use-container
       - run: npm run post-build
 
       - name: Assume the testing pipeline user role
@@ -197,13 +187,13 @@ jobs:
       - name: Deploy to testing account
         run: |
           sam deploy --stack-name ${TESTING_STACK_NAME} \
-            --no-confirm-changeset
             --template packaged-testing.yaml \
             --capabilities CAPABILITY_IAM \
             --region ${TESTING_REGION} \
             --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
             --no-fail-on-empty-changeset \
-            --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE}
+            --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE} \
+            --no-confirm-changeset
 
   integration-test:
     if: github.ref == 'refs/heads/main'
@@ -243,10 +233,10 @@ jobs:
       - name: Deploy to production account
         run: |
           sam deploy --stack-name ${PROD_STACK_NAME} \
-            --no-confirm-changeset
             --template packaged-prod.yaml \
             --capabilities CAPABILITY_IAM \
             --region ${PROD_REGION} \
             --s3-bucket ${PROD_ARTIFACTS_BUCKET} \
             --no-fail-on-empty-changeset \
-            --role-arn ${PROD_CLOUDFORMATION_EXECUTION_ROLE}
+            --role-arn ${PROD_CLOUDFORMATION_EXECUTION_ROLE} \
+            --no-confirm-changeset
