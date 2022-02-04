@@ -68,6 +68,8 @@ Resources:
             RestApiId: !Ref MyTasksApi
             Method: POST
             Path: /users
+            Auth:
+              Authorizer: NONE
   PatchUserFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -81,7 +83,7 @@ Resources:
         - !Ref UserLayer
         - !Ref GenericLayer
       Events:
-        CreateUserApi:
+        PatchUserApi:
           Type: Api
           Properties:
             RestApiId: !Ref MyTasksApi
@@ -100,7 +102,7 @@ Resources:
         - !Ref UserLayer
         - !Ref GenericLayer
       Events:
-        CreateUserApi:
+        DeleteUserApi:
           Type: Api
           Properties:
             RestApiId: !Ref MyTasksApi
@@ -131,7 +133,7 @@ Resources:
         - !Ref UserLayer
         - !Ref GenericLayer
       Events:
-        CreateUserApi:
+        LoginApi:
           Type: Api
           Properties:
             RestApiId: !Ref MyTasksApi
@@ -153,7 +155,7 @@ Resources:
         - !Ref ListLayer
         - !Ref GenericLayer
       Events:
-        CreateUserApi:
+        CreateListApi:
           Type: Api
           Properties:
             RestApiId: !Ref MyTasksApi
@@ -172,7 +174,7 @@ Resources:
         - !Ref ListLayer
         - !Ref GenericLayer
       Events:
-        CreateUserApi:
+        GetListsApi:
           Type: Api
           Properties:
             RestApiId: !Ref MyTasksApi
@@ -191,7 +193,7 @@ Resources:
         - !Ref ListLayer
         - !Ref GenericLayer
       Events:
-        CreateUserApi:
+        DeleteListApi:
           Type: Api
           Properties:
             RestApiId: !Ref MyTasksApi
@@ -211,7 +213,7 @@ Resources:
         - !Ref TaskLayer
         - !Ref GenericLayer
       Events:
-        CreateUserApi:
+        CreateTaskApi:
           Type: Api
           Properties:
             RestApiId: !Ref MyTasksApi
@@ -230,7 +232,7 @@ Resources:
         - !Ref TaskLayer
         - !Ref GenericLayer
       Events:
-        CreateUserApi:
+        GetTasksApi:
           Type: Api
           Properties:
             RestApiId: !Ref MyTasksApi
@@ -249,7 +251,7 @@ Resources:
         - !Ref TaskLayer
         - !Ref GenericLayer
       Events:
-        CreateUserApi:
+        UpdateTaskApi:
           Type: Api
           Properties:
             RestApiId: !Ref MyTasksApi
@@ -268,7 +270,7 @@ Resources:
         - !Ref TaskLayer
         - !Ref GenericLayer
       Events:
-        CreateUserApi:
+        DeleteTaskApi:
           Type: Api
           Properties:
             RestApiId: !Ref MyTasksApi
