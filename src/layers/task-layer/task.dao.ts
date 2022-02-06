@@ -2,7 +2,7 @@ import { APIGatewayProxyEventQueryStringParameters } from "aws-lambda";
 import { AWSError } from "aws-sdk";
 import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
 import { PromiseResult } from "aws-sdk/lib/request";
-import { Task } from "./task.model";
+import { GetTasksQuery, Task } from "./task.model";
 import { dynamoClient, TABLE_NAME } from "/opt/nodejs/dynamo.config";
 import { isAWSError, uuid } from "/opt/nodejs/util";
 
@@ -53,15 +53,9 @@ export const create = async (task: Task): Promise<string> => {
 
 export const getAll = async (
   listId: string,
-  query: APIGatewayProxyEventQueryStringParameters | null
+  query: APIGatewayProxyEventQueryStringParameters & GetTasksQuery
 ): Promise<PromiseResult<DocumentClient.QueryOutput, AWSError>> => {
   if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
-  if (
-    query &&
-    ((!query.dueDate && query.today) || (query.dueDate && !query.today))
-  ) {
-    throw { message: "Due date and Today are required together" };
-  }
 
   let filterExpression = "";
   const expressionAttributeNames = {
@@ -76,13 +70,13 @@ export const getAll = async (
     ":dueDate"?: string;
   } = {
     ":PK": `LIST#${listId}`,
-    ":SK": query?.includeCompleted ? `TASK#` : `TASK#active#`,
+    ":SK": query.includeCompleted ? `TASK#` : `TASK#active#`,
   };
-  if (query?.name) {
+  if (query.name) {
     filterExpression = "contains(nameSearch, :name)";
     expressionAttributeValues[":name"] = query.name.toLowerCase();
   }
-  if (query?.dueDate && query?.today) {
+  if (query.dueDate && query.today) {
     const date = new Date(query.today);
     const dueDate = query.dueDate;
     if (filterExpression) filterExpression += " and ";

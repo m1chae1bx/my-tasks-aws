@@ -50,7 +50,7 @@ export class Task {
 
   static getAll = async (
     listId: string,
-    query: APIGatewayProxyEventQueryStringParameters | null
+    query: APIGatewayProxyEventQueryStringParameters & GetTasksQuery
   ): Promise<PromiseResult<DocumentClient.QueryOutput, AWSError>> => {
     return getAll(listId, query);
   };
@@ -61,4 +61,11 @@ export class Task {
   ): Promise<PromiseResult<DocumentClient.DeleteItemOutput, AWSError>> => {
     return deleteTask(taskId, listId);
   };
+}
+
+export interface GetTasksQuery {
+  name?: string;
+  dueDate?: string;
+  today?: string;
+  includeCompleted?: "true";
 }
