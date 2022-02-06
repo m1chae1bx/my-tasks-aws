@@ -9,15 +9,15 @@ export class Task {
   listId: string;
   name: string;
   isCompleted: boolean;
-  dueDate: Date;
-  desc: string;
+  dueDate?: Date;
+  desc?: string;
 
   constructor(
     listId: string,
     name: string,
     isCompleted: boolean,
-    dueDate: Date,
-    desc: string,
+    dueDate?: Date,
+    desc?: string,
     id?: string
   ) {
     this.id = id;
