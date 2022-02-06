@@ -1,21 +1,28 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { validateRequest } from "./model";
 import { Task } from "/opt/nodejs/task.model";
 import { genericErrorHandler } from "/opt/nodejs/util";
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const taskId = event.pathParameters?.taskId;
-  const listId = event.pathParameters?.listId;
-  if (!taskId || !listId) {
-    return {
-      statusCode: 400,
-      body: "Bad Request",
-    };
-  }
-
   try {
+    const request = {
+      pathParameters: event.pathParameters,
+    };
+    if (!validateRequest(request)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "Bad request",
+          errors: validateRequest.errors,
+        }),
+      };
+    }
+
+    const { listId, taskId } = request.pathParameters;
     await Task.delete(taskId, listId);
+
     const response = { message: `Task ${taskId} was deleted successfully` };
     return {
       statusCode: 200,
@@ -24,7 +31,7 @@ export const handler = async (
   } catch (error) {
     return genericErrorHandler(
       error,
-      `An error occurred while deleting task ${taskId}`
+      `An error occurred while deleting the task. Please try again later.`
     );
   }
 };

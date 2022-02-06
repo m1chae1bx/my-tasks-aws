@@ -1,4 +1,4 @@
-import { JSONSchemaType } from "/opt/nodejs/util";
+import { JSONSchemaType, ajv } from "/opt/nodejs/util";
 
 export interface CreateTaskRequest {
   pathParameters: {
@@ -47,3 +47,5 @@ export const createTaskRequestSchema: JSONSchemaType<CreateTaskRequest> = {
   },
   required: ["pathParameters", "body"],
 };
+
+export const validateRequest = ajv.compile(createTaskRequestSchema);

@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { createTaskRequestSchema } from "./model";
+import { validateRequest } from "./model";
 import { Task } from "/opt/nodejs/task.model";
-import { genericErrorHandler, ajv } from "/opt/nodejs/util";
+import { genericErrorHandler } from "/opt/nodejs/util";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -12,12 +12,12 @@ export const handler = async (
       body: event.body ? JSON.parse(event.body) : {},
     };
 
-    const validate = ajv.compile(createTaskRequestSchema);
-    if (!validate(request)) {
+    if (!validateRequest(request)) {
       return {
         statusCode: 400,
         body: JSON.stringify({
-          message: validate.errors,
+          message: "Bad request",
+          errors: validateRequest.errors,
         }),
       };
     }
