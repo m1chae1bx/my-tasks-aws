@@ -15,8 +15,8 @@ export class Task {
   constructor(
     listId: string,
     name: string,
-    isCompleted: boolean,
-    dueDate?: Date,
+    isCompleted = false,
+    dueDate?: string,
     desc?: string,
     id?: string
   ) {
@@ -24,7 +24,7 @@ export class Task {
     this.listId = listId;
     this.name = name;
     this.isCompleted = isCompleted;
-    this.dueDate = dueDate;
+    this.dueDate = dueDate ? new Date(dueDate) : undefined;
     this.desc = desc;
   }
 

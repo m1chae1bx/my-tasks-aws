@@ -9,7 +9,7 @@ export const handler = async (
   try {
     const request = {
       pathParameters: event.pathParameters,
-      body: event.body ? JSON.parse(event.body) : {},
+      body: event.body ? JSON.parse(event.body) : undefined,
     };
 
     if (!validateRequest(request)) {
@@ -24,13 +24,7 @@ export const handler = async (
 
     const { name, dueDate, desc } = request.body;
     const { listId } = request.pathParameters;
-    const task = new Task(
-      listId,
-      name,
-      false,
-      dueDate ? new Date(dueDate) : undefined,
-      desc
-    );
+    const task = new Task(listId, name, false, dueDate, desc);
 
     const id = await task.save();
     const response = { message: `Task '${name}' was created successfully`, id };

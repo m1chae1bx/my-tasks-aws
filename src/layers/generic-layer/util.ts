@@ -7,7 +7,7 @@ import { v4 as uuid } from "uuid";
 export { default as Ajv, JSONSchemaType } from "ajv";
 import Ajv from "ajv";
 
-const ajv = new Ajv({ allErrors: true });
+const ajv = new Ajv({ allErrors: true, $data: true });
 addFormats(ajv);
 export { ajv };
 
