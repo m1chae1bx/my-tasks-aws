@@ -1,36 +1,28 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { validateRequest } from "./model";
 import { List } from "/opt/nodejs/list.model";
 import { genericErrorHandler } from "/opt/nodejs/util";
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const userId = event.pathParameters?.userId;
-  if (!userId) {
+  const request = {
+    pathParameters: event.pathParameters,
+    body: event.body ? JSON.parse(event.body) : undefined,
+  };
+
+  if (!validateRequest(request)) {
     return {
       statusCode: 400,
-      body: "User ID is required",
-    };
-  }
-  if (!event.body) {
-    return {
-      statusCode: 400,
-      body: "Bad Request",
+      body: JSON.stringify({
+        message: "Bad request",
+        errors: validateRequest.errors,
+      }),
     };
   }
 
-  const { name, isDefault } = JSON.parse(event.body);
-
-  if (!name) {
-    const response = {
-      message: "Name is required",
-      code: "missingField",
-    };
-    return {
-      statusCode: 400,
-      body: JSON.stringify(response),
-    };
-  }
+  const userId = request.pathParameters.userId;
+  const { name, isDefault } = request.body;
 
   const list = new List(name, userId, isDefault);
   try {
