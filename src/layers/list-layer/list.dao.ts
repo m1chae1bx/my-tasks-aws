@@ -12,14 +12,9 @@ export const create = async (
   | PromiseResult<DocumentClient.TransactWriteItemsOutput, AWSError>
   | string
 > => {
-  if (!list) throw { message: "Invalid list object" };
   if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
 
   const { name, userId, isDefault } = list;
-
-  if (!name) throw { message: "Name is required" };
-  if (!userId) throw { message: "User ID is required" };
-
   const id = uuid();
 
   if (isDefault) {
@@ -96,8 +91,6 @@ export const deleteList = (
   listId: string,
   userId: string
 ): Promise<PromiseResult<DocumentClient.DeleteItemOutput, AWSError>> => {
-  if (!listId) throw { message: "List ID is required" };
-  if (!userId) throw { message: "User ID is required" };
   if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
 
   const params = {
@@ -122,7 +115,6 @@ export const deleteList = (
 export const getAll = async (
   userId: string
 ): Promise<PromiseResult<DocumentClient.QueryOutput, AWSError>> => {
-  if (!userId) throw { message: "User ID is required" };
   if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
 
   const params = {

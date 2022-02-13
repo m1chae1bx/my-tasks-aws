@@ -8,9 +8,6 @@ import { isAWSError, uuid } from "/opt/nodejs/util";
 
 export const create = async (task: Task): Promise<string> => {
   if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
-  if (!task) throw { message: "Invalid task object" };
-  if (!task.name) throw { message: "Name is required" };
-  if (!task.listId) throw { message: "List ID is required" };
 
   const id = uuid();
   const item: {
@@ -126,7 +123,6 @@ export const update = async (
   | PromiseResult<DocumentClient.PutItemOutput, AWSError>
 > => {
   if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
-  if (!task) throw { message: "Invalid task object" };
   if (!task.name) throw { message: "Name is required" };
 
   const id = task.id;
@@ -223,8 +219,6 @@ export const deleteTask = async (
   listId: string
 ): Promise<PromiseResult<DocumentClient.DeleteItemOutput, AWSError>> => {
   if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
-  if (!taskId) throw { message: "Task ID is required" };
-  if (!listId) throw { message: "List ID is required" };
 
   const params = {
     TableName: TABLE_NAME,
