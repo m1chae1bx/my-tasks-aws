@@ -1,25 +1,26 @@
 import { User } from "/opt/nodejs/user.model";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { genericErrorHandler } from "/opt/nodejs/util";
+import { validateRequest } from "./model";
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  if (!event.body) {
-    return {
-      statusCode: 400,
-      body: "Bad Request",
-    };
-  }
-  const body = JSON.parse(event.body);
-  const { id, password } = body;
+  const request = {
+    body: event.body ? JSON.parse(event.body) : null,
+  };
 
-  if (!id || !password) {
+  if (!validateRequest(request)) {
     return {
       statusCode: 400,
-      body: "Bad Request",
+      body: JSON.stringify({
+        message: "Bad request",
+        errors: validateRequest.errors,
+      }),
     };
   }
+
+  const { id, password } = request.body;
 
   try {
     const user = await User.get(id);
