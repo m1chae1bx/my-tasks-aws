@@ -26,6 +26,12 @@ export const createUserRequestSchema: JSONSchemaType<CreateUserRequest> = {
         },
         password: {
           type: "string",
+          description:
+            "Must contain at least one letter, one number, and one special character, and must be between 8-20 characters long",
+          minLength: 8,
+          maxLength: 20,
+          pattern:
+            "^(?=[^A-Za-z]*[A-Za-z])(?=[^0-9]*[0-9])(?=[^@#$%&!_:\\-.]*[@#$%&!_:\\-.]).*",
         },
         fullName: {
           type: "string",
