@@ -1,42 +1,30 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { validateRequest } from "./model";
 import { User } from "/opt/nodejs/user.model";
 import { genericErrorHandler } from "/opt/nodejs/util";
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  if (!event.body || !event.pathParameters) {
-    return {
-      statusCode: 400,
-      body: "Bad Request",
-    };
-  }
-
-  const userId = event.pathParameters.userId;
-  const body = JSON.parse(event.body);
-  const { password } = body;
-
-  if (!userId) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({
-        message: "Username is required",
-        code: "missingField",
-      }),
-    };
-  }
-
-  if (!password) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({
-        message: "Password is required",
-        code: "missingField",
-      }),
-    };
-  }
-
   try {
+    const request = {
+      pathParameters: event.pathParameters,
+      body: event.body ? JSON.parse(event.body) : null,
+    };
+
+    if (!validateRequest(request)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "Bad request",
+          errors: validateRequest.errors,
+        }),
+      };
+    }
+
+    const userId = request.pathParameters.userId;
+    const password = request.body.password;
+
     const user = await User.get(userId);
     if (!user) {
       return {
@@ -47,7 +35,6 @@ export const handler = async (
         }),
       };
     }
-
     if (!user.validatePassword(password)) {
       return {
         statusCode: 401,
@@ -70,7 +57,7 @@ export const handler = async (
   } catch (error) {
     return genericErrorHandler(
       error,
-      `An error occurred while deleting user ${userId}`,
+      "An error occurred while deleting the user. Please try again later.",
       "deleteUserError"
     );
   }

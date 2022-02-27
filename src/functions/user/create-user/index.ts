@@ -1,4 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { validateRequest } from "./model";
 import { User } from "/opt/nodejs/user.model";
 import { genericErrorHandler, isAWSError } from "/opt/nodejs/util";
 
@@ -15,18 +16,23 @@ const usernameUnavailableResponse = {
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  // TODO move validation to json schema validation
-  if (!event.body) {
-    return {
-      statusCode: 400,
-      body: "Bad Request", // TODO: create a message property
-    };
-  }
-
-  const body = JSON.parse(event.body);
-  const { id, email, password, fullName, nickname } = body;
-
   try {
+    const request = {
+      body: event.body ? JSON.parse(event.body) : null,
+    };
+
+    if (!validateRequest(request)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "Bad request",
+          errors: validateRequest.errors,
+        }),
+      };
+    }
+
+    const { id, email, password, fullName, nickname } = request.body;
+
     const userByEmail = await User.getByEmail(email);
     if (userByEmail) {
       return {
@@ -66,7 +72,7 @@ export const handler = async (
 
     return genericErrorHandler(
       error,
-      `An error occurred while creating user ${id}`
+      `An error occurred while creating the user. Please try again later.`
     );
   }
 };

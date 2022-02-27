@@ -1,35 +1,36 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { validateRequest } from "./model";
 import { User } from "/opt/nodejs/user.model";
 import { genericErrorHandler } from "/opt/nodejs/util";
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  // TODO improve server side validation
-  const userId = event.pathParameters?.userId;
-  if (!userId) {
-    return {
-      statusCode: 400,
-      body: "Bad Request",
-    };
-  }
-  if (!event.body) {
-    return {
-      statusCode: 400,
-      body: "Bad Request", // TODO: create a message property
-    };
-  }
-
-  const body = JSON.parse(event.body);
-  const { email, fullName, nickname } = body;
-  const userPartial: Partial<User> = {
-    id: userId,
-    email,
-    fullName,
-    nickname,
-  };
-
   try {
+    const request = {
+      pathParameters: event.pathParameters,
+      body: event.body ? JSON.parse(event.body) : null,
+    };
+
+    if (!validateRequest(request)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "Bad request",
+          errors: validateRequest.errors,
+        }),
+      };
+    }
+
+    const userId = request.pathParameters.userId;
+    const { email, fullName, nickname } = request.body;
+    const userPartial: Partial<User> = {
+      id: userId,
+      email,
+      fullName,
+      nickname,
+    };
+
     await User.patch(userPartial);
     const response = {
       message: `User ${userId} was patched successfully`,
@@ -42,7 +43,7 @@ export const handler = async (
   } catch (error) {
     return genericErrorHandler(
       error,
-      `An error occurred while patching user ${userId}`
+      `An error occurred while patching the user. Please try again later.`
     );
   }
 };

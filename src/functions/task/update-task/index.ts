@@ -9,7 +9,7 @@ export const handler = async (
   try {
     const request = {
       pathParameters: event.pathParameters,
-      body: event.body ? JSON.parse(event.body) : undefined,
+      body: event.body ? JSON.parse(event.body) : null,
     };
 
     if (!validateRequest(request)) {
