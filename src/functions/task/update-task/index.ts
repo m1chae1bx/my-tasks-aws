@@ -1,54 +1,32 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { validateRequest } from "./model";
 import { Task } from "/opt/nodejs/task.model";
 import { genericErrorHandler } from "/opt/nodejs/util";
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  if (!event.body) {
-    return {
-      statusCode: 400,
-      body: "Bad Request",
-    };
-  }
-  const listId = event.pathParameters?.listId;
-  const queryId = event.pathParameters?.taskId;
-  const { id, name, isCompleted, dueDate, desc } = JSON.parse(event.body);
-
-  if (!listId) {
-    const response = {
-      message: "List ID is required",
-    };
-    return {
-      statusCode: 400,
-      body: JSON.stringify(response),
-    };
-  }
-  if (queryId !== id) {
-    const response = {
-      message: "Task ID in parameters and body must match",
-      code: "idsNotMatching",
-    };
-    return {
-      statusCode: 400,
-      body: JSON.stringify(response),
-    };
-  }
-
-  if (!name) {
-    const response = {
-      message: "Name is required",
-      code: "missingField",
-    };
-    return {
-      statusCode: 400,
-      body: JSON.stringify(response),
-    };
-  }
-
-  const task = new Task(listId, name, isCompleted, dueDate, desc, id);
-
   try {
+    const request = {
+      pathParameters: event.pathParameters,
+      body: event.body ? JSON.parse(event.body) : null,
+    };
+
+    if (!validateRequest(request)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "Bad request",
+          errors: validateRequest.errors,
+        }),
+      };
+    }
+
+    const listId = request.pathParameters.listId;
+    const { id, name, isCompleted, dueDate, desc } = request.body;
+
+    const task = new Task(listId, name, isCompleted, dueDate, desc, id);
+
     await task.update();
     return {
       statusCode: 200,
@@ -59,7 +37,7 @@ export const handler = async (
   } catch (error) {
     return genericErrorHandler(
       error,
-      `An error occurred while updating the task ${task.id}`
+      `An error occurred while updating the task. Please try again later.`
     );
   }
 };

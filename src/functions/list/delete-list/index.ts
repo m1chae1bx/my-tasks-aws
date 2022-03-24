@@ -1,24 +1,27 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { validateRequest } from "./model";
 import { List } from "/opt/nodejs/list.model";
 import { genericErrorHandler } from "/opt/nodejs/util";
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  if (
-    !event.pathParameters ||
-    !event.pathParameters.listId ||
-    !event.pathParameters.userId
-  ) {
-    return {
-      statusCode: 400,
-      body: "Bad Request",
-    };
-  }
-  const userId = event.pathParameters.userId;
-  const listId = event.pathParameters.listId;
-
   try {
+    const request = {
+      pathParameters: event.pathParameters,
+    };
+
+    if (!validateRequest(request)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "Bad request",
+          errors: validateRequest.errors,
+        }),
+      };
+    }
+    const { userId, listId } = request.pathParameters;
+
     await List.delete(listId, userId);
     const response = {
       message: `List ${listId} was deleted successfully`,
@@ -30,7 +33,7 @@ export const handler = async (
   } catch (error) {
     return genericErrorHandler(
       error,
-      `An error occurred while deleting list ${listId}`
+      `An error occurred while deleting the list. Please try again later.`
     );
   }
 };

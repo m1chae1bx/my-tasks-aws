@@ -7,9 +7,9 @@ export class List {
   id?: string;
   name: string;
   userId: string;
-  isDefault: string;
+  isDefault: boolean;
 
-  constructor(name: string, userId: string, isDefault: string, id?: string) {
+  constructor(name: string, userId: string, isDefault = false, id?: string) {
     this.id = id;
     this.name = name;
     this.userId = userId;

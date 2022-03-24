@@ -1,39 +1,31 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { validateRequest } from "./model";
 import { List } from "/opt/nodejs/list.model";
 import { genericErrorHandler } from "/opt/nodejs/util";
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const userId = event.pathParameters?.userId;
-  if (!userId) {
-    return {
-      statusCode: 400,
-      body: "User ID is required",
-    };
-  }
-  if (!event.body) {
-    return {
-      statusCode: 400,
-      body: "Bad Request",
-    };
-  }
-
-  const { name, isDefault } = JSON.parse(event.body);
-
-  if (!name) {
-    const response = {
-      message: "Name is required",
-      code: "missingField",
-    };
-    return {
-      statusCode: 400,
-      body: JSON.stringify(response),
-    };
-  }
-
-  const list = new List(name, userId, isDefault);
   try {
+    const request = {
+      pathParameters: event.pathParameters,
+      body: event.body ? JSON.parse(event.body) : null,
+    };
+
+    if (!validateRequest(request)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "Bad request",
+          errors: validateRequest.errors,
+        }),
+      };
+    }
+
+    const userId = request.pathParameters.userId;
+    const { name, isDefault } = request.body;
+
+    const list = new List(name, userId, isDefault);
     const id = await list.save();
     const response = { message: `List ${name} was created successfully`, id };
     return {
@@ -43,7 +35,7 @@ export const handler = async (
   } catch (error) {
     return genericErrorHandler(
       error,
-      `An error occurred while creating the list ${name}`
+      `An error occurred while creating the list. Please try again later.`
     );
   }
 };
