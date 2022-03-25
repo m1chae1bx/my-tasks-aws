@@ -18,6 +18,8 @@ Parameters:
   StageName:
     Type: String
     Default: dev
+  JWTSecret:
+    Type: String
 Resources:
   MyTasksApi:
     Type: AWS::Serverless::Api
@@ -119,7 +121,7 @@ Resources:
       Description: A Lambda function that checks if the user is authorized to access the API
       Environment:
         Variables:
-          JWT_SECRET: ""
+          JWT_SECRET: !Ref JWTSecret
   LoginFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -127,7 +129,7 @@ Resources:
       Description: A Lambda function that logs in a user
       Environment:
         Variables:
-          JWT_SECRET: ""
+          JWT_SECRET: !Ref JWTSecret
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MyTasksTable

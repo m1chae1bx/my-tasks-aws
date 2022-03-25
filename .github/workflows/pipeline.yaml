@@ -99,6 +99,7 @@ jobs:
             --no-fail-on-empty-changeset \
             --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE} \
             --no-confirm-changeset
+            --parameter-overrides StageName=dev JWTSecret=this-is-a-test-secret
 
   build-and-package:
     if: github.ref == 'refs/heads/main'
