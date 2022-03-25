@@ -31,7 +31,7 @@ Resources:
             FunctionArn: !GetAtt LambdaAuthorizerFunction.Arn
             Identity:
               ValidationExpression: Bearer.*
-              ReauthorizeEvery: 0
+              ReauthorizeEvery: 600
   #### USER RELATED RESOURCES ####
   GetUserFunction:
     Type: AWS::Serverless::Function
