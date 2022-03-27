@@ -1,12 +1,12 @@
 version = 0.1
-[default]
-[default.deploy]
-[default.deploy.parameters]
+[dev]
+[dev.deploy]
+[dev.deploy.parameters]
 stack_name = "my-tasks-app"
 s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-xfjl4ol02vsz"
 s3_prefix = "my-tasks-app"
 region = "ap-southeast-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "StageName=\"dev\" JWTSecret=\"this-is-a-test-secret\""
+parameter_overrides = "StageName=\"dev\" JWTSecret=\"this-is-a-test-secret\"" 
 image_repositories = []

@@ -9,7 +9,8 @@
     "compile": "tsc -p ./src",
     "build": "sam build -s ./src",
     "post-build": "find .aws-sam -name '*.ts' -type f|xargs rm -f && find src ! -path '*/node_modules/*' -name '*.js' -type f|xargs rm -f",
-    "deploy-env": "sam deploy --config-env dev --parameter-overrides StageName=dev",
+    "deploy-dev": "sam deploy --config-env dev",
+    "build-and-deploy": "npm run compile && npm run build && npm run post-build && npm run deploy-dev",
     "format": "npx prettier --write ."
   },
   "author": "",

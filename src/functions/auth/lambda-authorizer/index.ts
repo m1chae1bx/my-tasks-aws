@@ -16,6 +16,7 @@ const isUserDetailsPayload = (
 export const handler = async (
   event: APIGatewayTokenAuthorizerEvent
 ): Promise<APIGatewayAuthorizerResult> => {
+  const { AWS_REGION, ACCOUNT_ID } = process.env;
   const response: APIGatewayAuthorizerResult = {
     principalId: "",
     policyDocument: {
@@ -24,7 +25,7 @@ export const handler = async (
         {
           Action: "execute-api:Invoke",
           Effect: "Deny",
-          Resource: event.methodArn,
+          Resource: `arn:aws:execute-api:${AWS_REGION}:${ACCOUNT_ID}:*`,
         },
       ],
     },
@@ -50,6 +51,8 @@ export const handler = async (
   } catch (error) {
     console.error("Error verifying token", error);
   }
+
+  console.log("response", response);
 
   return response;
 };

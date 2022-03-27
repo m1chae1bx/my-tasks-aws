@@ -98,7 +98,7 @@ jobs:
             --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
             --no-fail-on-empty-changeset \
             --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE} \
-            --no-confirm-changeset
+            --no-confirm-changeset \
             --parameter-overrides StageName=dev JWTSecret=this-is-a-test-secret
 
   build-and-package:
@@ -194,7 +194,8 @@ jobs:
             --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
             --no-fail-on-empty-changeset \
             --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE} \
-            --no-confirm-changeset
+            --no-confirm-changeset \
+            --parameter-overrides StageName=dev JWTSecret=this-is-a-test-secret
 
   integration-test:
     if: github.ref == 'refs/heads/main'
@@ -240,4 +241,5 @@ jobs:
             --s3-bucket ${PROD_ARTIFACTS_BUCKET} \
             --no-fail-on-empty-changeset \
             --role-arn ${PROD_CLOUDFORMATION_EXECUTION_ROLE} \
-            --no-confirm-changeset
+            --no-confirm-changeset \
+            --parameter-overrides StageName=v1
