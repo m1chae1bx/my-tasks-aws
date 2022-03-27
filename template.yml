@@ -33,7 +33,7 @@ Resources:
             FunctionArn: !GetAtt LambdaAuthorizerFunction.Arn
             Identity:
               ValidationExpression: Bearer.*
-              ReauthorizeEvery: 600
+              ReauthorizeEvery: 3600
   #### USER RELATED RESOURCES ####
   GetUserFunction:
     Type: AWS::Serverless::Function
@@ -122,6 +122,7 @@ Resources:
       Environment:
         Variables:
           JWT_SECRET: !Ref JWTSecret
+          ACCOUNT_ID: !Sub "${AWS::AccountId}"
   LoginFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -332,6 +333,7 @@ Resources:
         - nodejs14.x
     Metadata:
       BuildMethod: nodejs14.x
+  ### DATA STORAGE ###
   MyTasksTable:
     Type: AWS::DynamoDB::Table
     Properties:
