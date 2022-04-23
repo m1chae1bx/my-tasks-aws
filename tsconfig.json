@@ -19,7 +19,7 @@
       "/opt/nodejs/list.model": ["layers/list-layer/list.model"],
       "/opt/nodejs/task.model": ["layers/task-layer/task.model"],
       "/opt/nodejs/util": ["layers/generic-layer/util"],
-      "@test-utils/base-objects": ["test-utils/base-objects"]
+      "@test-utils/*": ["test-utils/*"]
     }
   },
   "include": ["src/**/*"]
