@@ -4,9 +4,9 @@
   "description": "This project contains source code and supporting files for a serverless application that you can deploy with the AWS Serverless Application Model (AWS SAM) command line interface (CLI). It includes the following files and folders:",
   "main": "index.js",
   "scripts": {
-    "test": "jest --rootDir src --config ./src/jest.config.js",
+    "test": "jest --rootDir src --config ./jest.config.ts",
     "pre-build": "find ./src ! -path '*/node_modules/*' -name 'package.json' -execdir npm install \\;",
-    "compile": "tsc -p ./src",
+    "compile": "tsc -p tsconfig.build.json",
     "build": "sam build -s ./src",
     "post-build": "find .aws-sam -name '*.ts' -type f|xargs rm -f && find src ! -path '*/node_modules/*' -name '*.js' -type f|xargs rm -f",
     "deploy-dev": "sam deploy --config-env dev",
@@ -25,5 +25,8 @@
     "jest": "^27.5.1",
     "prettier": "2.4.1",
     "ts-jest": "^27.1.4"
+  },
+  "dependencies": {
+    "ts-node": "^10.7.0"
   }
 }

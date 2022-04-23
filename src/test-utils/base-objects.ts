@@ -1,6 +1,9 @@
-import { APIGatewayProxyEvent } from "aws-lambda";
+import {
+  APIGatewayProxyEvent,
+  APIGatewayTokenAuthorizerEvent,
+} from "aws-lambda";
 
-const baseEvent: APIGatewayProxyEvent = {
+export const baseAPIGatewayProxyEvent: APIGatewayProxyEvent = {
   headers: {},
   multiValueHeaders: {},
   httpMethod: "",
@@ -44,32 +47,11 @@ const baseEvent: APIGatewayProxyEvent = {
   resource: "",
 };
 
-export class TestEventFactory {
-  static createAPIEvent(): TestEvent {
-    return new TestEvent(baseEvent);
-  }
-}
-
-class TestEvent {
-  _event: APIGatewayProxyEvent;
-  constructor(event: APIGatewayProxyEvent) {
-    this._event = event;
-  }
-
-  body(obj: { [key: string]: string }): TestEvent {
-    this._event.body = JSON.stringify(obj);
-    return this;
-  }
-
-  merge(obj: { [key: string]: string }): TestEvent {
-    this._event = { ...this._event, ...obj };
-    return this;
-  }
-
-  generate(): APIGatewayProxyEvent {
-    return this._event;
-  }
-}
+export const baseTokenAuthorizerEvent: APIGatewayTokenAuthorizerEvent = {
+  authorizationToken: "Bearer test-bearer-token",
+  methodArn: "test-method-arn",
+  type: "TOKEN",
+};
 
 export const ajvError = [
   {

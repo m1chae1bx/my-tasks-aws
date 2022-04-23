@@ -1,5 +1,5 @@
 import { handler } from "../index";
-import { loginEvent } from "./test-data";
+import { loginEvent } from "../test-data/login-event";
 import { validateRequest } from "../model";
 import { User } from "/opt/nodejs/user.model";
 import { APIGatewayProxyResult } from "aws-lambda";

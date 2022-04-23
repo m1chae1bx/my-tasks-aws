@@ -52,7 +52,5 @@ export const handler = async (
     console.error("Error verifying token", error);
   }
 
-  console.log("response", response);
-
   return response;
 };
