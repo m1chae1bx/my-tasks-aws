@@ -22,5 +22,5 @@
       "@test-utils/*": ["test-utils/*"]
     }
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "jest.config.ts"]
 }
