@@ -8,6 +8,7 @@ import {
 } from "/opt/nodejs/dynamo.config";
 import { User, UserDetails } from "./user.model";
 import { isAWSError } from "/opt/nodejs/util";
+import { UsernameUnavailableError } from "/opt/nodejs/errors";
 
 export const create = async (user: UserDetails): Promise<string> => {
   if (!user) throw { message: "Empty user object" };
@@ -28,7 +29,8 @@ export const create = async (user: UserDetails): Promise<string> => {
     return user.id;
   } catch (error) {
     if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
-      error.message = `User ${user.id} is already existing`;
+      console.error(error);
+      throw new UsernameUnavailableError();
     }
     throw error;
   }

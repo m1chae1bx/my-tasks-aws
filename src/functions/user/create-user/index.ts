@@ -1,17 +1,11 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { validateRequest } from "./model";
+import {
+  EmailUnavailableError,
+  UsernameUnavailableError,
+} from "/opt/nodejs/errors";
 import { User } from "/opt/nodejs/user.model";
-import { genericErrorHandler, isAWSError } from "/opt/nodejs/util";
-
-const emailUnavailableResponse = {
-  message: "Email address is already registered",
-  code: "emailUnavailable",
-};
-
-const usernameUnavailableResponse = {
-  message: "Username is already taken",
-  code: "usernameUnavailable",
-};
+import { genericErrorHandler } from "/opt/nodejs/util";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -37,15 +31,14 @@ export const handler = async (
     if (userByEmail) {
       return {
         statusCode: 409,
-        body: JSON.stringify(emailUnavailableResponse),
+        body: JSON.stringify(new EmailUnavailableError()),
       };
     } else {
       const userByUsername = await User.get(id);
       if (userByUsername) {
         return {
-          // TODO create a Response object or use existing AWS if any?
           statusCode: 409,
-          body: JSON.stringify(usernameUnavailableResponse),
+          body: JSON.stringify(new UsernameUnavailableError()),
         };
       } else {
         const newUser = new User(id, email, fullName, nickname);
@@ -63,10 +56,10 @@ export const handler = async (
       }
     }
   } catch (error) {
-    if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
+    if (error instanceof UsernameUnavailableError) {
       return {
         statusCode: 409,
-        body: JSON.stringify(emailUnavailableResponse),
+        body: JSON.stringify(error),
       };
     }
 
