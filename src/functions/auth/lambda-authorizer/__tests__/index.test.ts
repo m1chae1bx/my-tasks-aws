@@ -8,6 +8,11 @@ jest.mock("jsonwebtoken", () => ({
 }));
 
 describe("lambda-authorizer", () => {
+  beforeAll(() => {
+    jest.spyOn(console, "error").mockImplementation(() => {});
+    jest.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
   describe("happy path", () => {
     let result: APIGatewayAuthorizerResult;
 
