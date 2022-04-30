@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`delete-user happy path should return a success message 1`] = `"{\\"message\\":\\"User testUserId was deleted successfully\\",\\"code\\":\\"userDeleted\\"}"`;
+
+exports[`delete-user sad path - error while deleting user should return an error message 1`] = `"test error"`;
+
+exports[`delete-user sad path - incorrect password should return an error message 1`] = `"{\\"message\\":\\"Incorrect password\\",\\"code\\":\\"incorrectPassword\\"}"`;
+
+exports[`delete-user sad path - invalid request should return errors 1`] = `"{\\"message\\":\\"Bad request\\",\\"errors\\":[{\\"keyword\\":\\"\\",\\"instancePath\\":\\"\\",\\"schemaPath\\":\\"\\",\\"params\\":{},\\"message\\":\\"test error\\"}]}"`;
+
+exports[`delete-user sad path - user not found should return an error message 1`] = `"{\\"message\\":\\"User not found\\",\\"code\\":\\"notFound\\"}"`;
