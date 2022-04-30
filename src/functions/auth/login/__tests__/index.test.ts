@@ -55,7 +55,7 @@ describe("login", () => {
 
     it("should return errors", () => {
       expect(result.body).toMatchSnapshot();
-      expect(result.body).toContain("test error");
+      expect(result.body).toContain(ajvError[0].message);
     });
   });
 
