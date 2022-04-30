@@ -97,6 +97,7 @@ describe("get-user", () => {
 
     it("should return an error message", () => {
       expect(result.body).toMatchSnapshot();
+      expect(result.body).toContain("test error");
     });
   });
 });
