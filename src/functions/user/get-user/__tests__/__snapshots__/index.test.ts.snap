@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`get-user happy path should return a success message 1`] = `"{\\"user\\":{\\"fullName\\":\\"Full Name\\",\\"nickname\\":\\"Nickname\\",\\"id\\":\\"testUserId\\",\\"email\\":\\"test@email.com\\"}}"`;
+
+exports[`get-user sad path - error while getting user should return an error message 1`] = `"test error"`;
+
+exports[`get-user sad path - invalid request should return errors 1`] = `"{\\"message\\":\\"Bad request\\",\\"errors\\":[{\\"keyword\\":\\"\\",\\"instancePath\\":\\"\\",\\"schemaPath\\":\\"\\",\\"params\\":{},\\"message\\":\\"test error\\"}]}"`;
+
+exports[`get-user sad path - user not found should return an error message 1`] = `"{\\"message\\":\\"User testUserId was not found\\"}"`;
