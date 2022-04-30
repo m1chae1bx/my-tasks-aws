@@ -26,8 +26,8 @@ describe("get-user", () => {
     let result: APIGatewayProxyResult;
 
     beforeAll(async () => {
-      (validateRequest as unknown as jest.Mock).mockReturnValue(true);
-      (User.get as jest.Mock).mockResolvedValue(testUser);
+      (validateRequest as unknown as jest.Mock).mockReturnValueOnce(true);
+      (User.get as jest.Mock).mockResolvedValueOnce(testUser);
       result = await handler(getUserEvent);
     });
 
@@ -45,7 +45,7 @@ describe("get-user", () => {
     let result: APIGatewayProxyResult;
 
     beforeAll(async () => {
-      (validateRequest as unknown as jest.Mock).mockReturnValue(false);
+      (validateRequest as unknown as jest.Mock).mockReturnValueOnce(false);
       validateRequest.errors = ajvError;
       result = await handler(getUserEvent);
     });
@@ -64,8 +64,8 @@ describe("get-user", () => {
     let result: APIGatewayProxyResult;
 
     beforeAll(async () => {
-      (validateRequest as unknown as jest.Mock).mockReturnValue(true);
-      (User.get as jest.Mock).mockResolvedValue(null);
+      (validateRequest as unknown as jest.Mock).mockReturnValueOnce(true);
+      (User.get as jest.Mock).mockResolvedValueOnce(null);
       result = await handler(getUserEvent);
     });
 
@@ -82,8 +82,8 @@ describe("get-user", () => {
     let result: APIGatewayProxyResult;
 
     beforeAll(async () => {
-      (validateRequest as unknown as jest.Mock).mockReturnValue(true);
-      (User.get as jest.Mock).mockRejectedValue(new Error("error"));
+      (validateRequest as unknown as jest.Mock).mockReturnValueOnce(true);
+      (User.get as jest.Mock).mockRejectedValueOnce(new Error("error"));
       (genericErrorHandler as jest.Mock).mockReturnValueOnce({
         statusCode: 500,
         body: "test error",

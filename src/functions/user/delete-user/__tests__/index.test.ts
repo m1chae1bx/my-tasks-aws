@@ -25,9 +25,9 @@ describe("delete-user", () => {
     let result: APIGatewayProxyResult;
 
     beforeAll(async () => {
-      (validateRequest as unknown as jest.Mock).mockReturnValue(true);
-      (User.get as jest.Mock).mockResolvedValue({
-        validatePassword: jest.fn().mockReturnValue(true),
+      (validateRequest as unknown as jest.Mock).mockReturnValueOnce(true);
+      (User.get as jest.Mock).mockResolvedValueOnce({
+        validatePassword: jest.fn().mockReturnValueOnce(true),
         delete: jest.fn(),
       });
       result = await handler(deleteUserEvent);
@@ -46,7 +46,7 @@ describe("delete-user", () => {
     let result: APIGatewayProxyResult;
 
     beforeAll(async () => {
-      (validateRequest as unknown as jest.Mock).mockReturnValue(false);
+      (validateRequest as unknown as jest.Mock).mockReturnValueOnce(false);
       validateRequest.errors = ajvError;
       result = await handler(deleteUserEvent);
     });
@@ -65,8 +65,8 @@ describe("delete-user", () => {
     let result: APIGatewayProxyResult;
 
     beforeAll(async () => {
-      (validateRequest as unknown as jest.Mock).mockReturnValue(true);
-      (User.get as jest.Mock).mockResolvedValue(null);
+      (validateRequest as unknown as jest.Mock).mockReturnValueOnce(true);
+      (User.get as jest.Mock).mockResolvedValueOnce(null);
       result = await handler(deleteUserEvent);
     });
 
@@ -83,9 +83,9 @@ describe("delete-user", () => {
     let result: APIGatewayProxyResult;
 
     beforeAll(async () => {
-      (validateRequest as unknown as jest.Mock).mockReturnValue(true);
-      (User.get as jest.Mock).mockResolvedValue({
-        validatePassword: jest.fn().mockReturnValue(false),
+      (validateRequest as unknown as jest.Mock).mockReturnValueOnce(true);
+      (User.get as jest.Mock).mockResolvedValueOnce({
+        validatePassword: jest.fn().mockReturnValueOnce(false),
       });
       result = await handler(deleteUserEvent);
     });
@@ -103,10 +103,10 @@ describe("delete-user", () => {
     let result: APIGatewayProxyResult;
 
     beforeAll(async () => {
-      (validateRequest as unknown as jest.Mock).mockReturnValue(true);
-      (User.get as jest.Mock).mockResolvedValue({
-        validatePassword: jest.fn().mockReturnValue(true),
-        delete: jest.fn().mockRejectedValue(new Error("error")),
+      (validateRequest as unknown as jest.Mock).mockReturnValueOnce(true);
+      (User.get as jest.Mock).mockResolvedValueOnce({
+        validatePassword: jest.fn().mockReturnValueOnce(true),
+        delete: jest.fn().mockRejectedValueOnce(new Error("error")),
       });
       (genericErrorHandler as jest.Mock).mockReturnValueOnce({
         statusCode: 500,

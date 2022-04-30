@@ -24,9 +24,9 @@ describe("login", () => {
 
     beforeAll(async () => {
       (validateRequest as unknown as jest.Mock).mockReturnValueOnce(true);
-      (User.get as jest.Mock).mockResolvedValue({
-        validatePassword: jest.fn().mockReturnValue(true),
-        generateJwt: jest.fn().mockReturnValue("test-token"),
+      (User.get as jest.Mock).mockResolvedValueOnce({
+        validatePassword: jest.fn().mockReturnValueOnce(true),
+        generateJwt: jest.fn().mockReturnValueOnce("test-token"),
       });
       result = await handler(loginEvent);
     });
@@ -64,8 +64,8 @@ describe("login", () => {
 
     beforeAll(async () => {
       (validateRequest as unknown as jest.Mock).mockReturnValueOnce(true);
-      (User.get as jest.Mock).mockResolvedValue({
-        validatePassword: jest.fn().mockReturnValue(false),
+      (User.get as jest.Mock).mockResolvedValueOnce({
+        validatePassword: jest.fn().mockReturnValueOnce(false),
       });
       result = await handler(loginEvent);
     });
@@ -84,7 +84,7 @@ describe("login", () => {
 
     beforeAll(async () => {
       (validateRequest as unknown as jest.Mock).mockReturnValueOnce(true);
-      (User.get as jest.Mock).mockRejectedValue(new Error("test error"));
+      (User.get as jest.Mock).mockRejectedValueOnce(new Error("test error"));
       (genericErrorHandler as jest.Mock).mockReturnValueOnce({
         statusCode: 500,
         body: "test error",
