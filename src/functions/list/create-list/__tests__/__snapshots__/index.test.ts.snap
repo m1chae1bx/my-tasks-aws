@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`create-list happy path should return the list id 1`] = `"{\\"message\\":\\"List testListName was created successfully\\"}"`;
+
+exports[`create-list sad path - error while saving list should return the error message 1`] = `"test error"`;
+
+exports[`create-list sad path - invalid request should return the validation errors 1`] = `"{\\"message\\":\\"Bad request\\",\\"errors\\":[{\\"keyword\\":\\"\\",\\"instancePath\\":\\"\\",\\"schemaPath\\":\\"\\",\\"params\\":{},\\"message\\":\\"test error\\"}]}"`;
