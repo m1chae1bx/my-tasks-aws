@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`get-tasks happy path should return the tasks 1`] = `"[{\\"id\\":\\"test-task-id-1\\",\\"name\\":\\"test-task-name-2\\",\\"desc\\":\\"test-task-desc\\",\\"isCompleted\\":false,\\"dueDate\\":\\"2020-01-01T00:00:00.000Z\\",\\"listId\\":\\"test-list-id\\"},{\\"id\\":\\"test-task-id-2\\",\\"name\\":\\"test-task-name-2\\",\\"desc\\":\\"test-task-desc\\",\\"isCompleted\\":true,\\"dueDate\\":\\"2020-01-01T00:00:00.000Z\\",\\"listId\\":\\"test-list-id\\"}]"`;
+
+exports[`get-tasks sad path - error while getting tasks should return the error 1`] = `"test error"`;
+
+exports[`get-tasks sad path - invalid request should return the error 1`] = `"{\\"message\\":\\"Bad request\\",\\"errors\\":[{\\"keyword\\":\\"\\",\\"instancePath\\":\\"\\",\\"schemaPath\\":\\"\\",\\"params\\":{},\\"message\\":\\"test error\\"}]}"`;
