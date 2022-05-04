@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`genericErrorHandler - with optional params should call console.error 1`] = `
+Array [
+  Array [
+    Object {
+      "context": "test context",
+      "error": [Error: error],
+      "referenceId": "test-uuid",
+    },
+  ],
+]
+`;
+
+exports[`genericErrorHandler - with optional params should return a result 1`] = `
+Object {
+  "body": "{\\"message\\":\\"test message\\",\\"code\\":\\"test code\\",\\"referenceId\\":\\"test-uuid\\"}",
+  "statusCode": 500,
+}
+`;
+
+exports[`genericErrorHandler - without optional params should call console.error 1`] = `
+Array [
+  Array [
+    Object {
+      "context": undefined,
+      "error": [Error: error],
+      "referenceId": "test-uuid",
+    },
+  ],
+]
+`;
+
+exports[`genericErrorHandler - without optional params should return a result 1`] = `
+Object {
+  "body": "{\\"message\\":\\"test message\\",\\"referenceId\\":\\"test-uuid\\"}",
+  "statusCode": 500,
+}
+`;
