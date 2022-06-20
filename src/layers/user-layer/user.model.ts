@@ -50,7 +50,7 @@ export class User implements UserDetails {
     return create(this);
   }
 
-  delete(): Promise<PromiseResult<DocumentClient.DeleteItemOutput, AWSError>> {
+  delete(): Promise<void> {
     return deleteUser(this.id);
   }
 

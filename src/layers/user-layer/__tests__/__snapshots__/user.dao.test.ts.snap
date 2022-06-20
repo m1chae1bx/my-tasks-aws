@@ -1,0 +1,128 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`create sad path - DynamoDB put unknown error should throw an error 1`] = `[Error: error]`;
+
+exports[`create sad path - username unavailable should log error 1`] = `
+Array [
+  Array [
+    Object {
+      "code": "ConditionalCheckFailedException",
+      "message": "The conditional request failed",
+      "name": "ConditionalCheckFailedException",
+      "time": 2022-01-01T00:00:00.000Z,
+    },
+  ],
+]
+`;
+
+exports[`create sad path - username unavailable should throw an error 1`] = `
+UsernameUnavailableError {
+  "errorCode": "usernameUnavailable",
+  "message": "Username is already taken",
+  "name": "UsernameUnavailableError",
+}
+`;
+
+exports[`deleteUser happy path should call DynamoDB delete 1`] = `
+Array [
+  Array [
+    Object {
+      "ConditionExpression": "attribute_exists(PK)",
+      "Key": Object {
+        "PK": "USER#testUserId",
+        "SK": "USER#testUserId",
+      },
+      "TableName": "test-table-name",
+    },
+  ],
+]
+`;
+
+exports[`deleteUser sad path - DynamoDB delete unknown error should throw an error 1`] = `[Error: error]`;
+
+exports[`deleteUser sad path - user not found should log error 1`] = `
+Array [
+  Array [
+    Object {
+      "code": "ConditionalCheckFailedException",
+      "message": "The conditional request failed",
+      "name": "ConditionalCheckFailedException",
+      "time": 2022-01-01T00:00:00.000Z,
+    },
+  ],
+]
+`;
+
+exports[`get happy path should return the user 1`] = `
+Object {
+  "email": "test@email.com",
+  "fullName": "Full Name",
+  "hash": "test-hash",
+  "id": "testUserId",
+  "nickname": "Nickname",
+  "preferences": Object {
+    "defaultListId": "test-default-list-id",
+  },
+  "salt": "test-salt",
+}
+`;
+
+exports[`get sad path - DynamoDB get unknown error should throw an error 1`] = `[Error: error]`;
+
+exports[`getByEmail happy path should return the user 1`] = `
+Object {
+  "email": "test@email.com",
+  "fullName": "Full Name",
+  "hash": "test-hash",
+  "id": "testUserId",
+  "nickname": "Nickname",
+  "preferences": Object {
+    "defaultListId": "test-default-list-id",
+  },
+  "salt": "test-salt",
+}
+`;
+
+exports[`getByEmail sad path - DynamoDB get unknown error should throw an error 1`] = `
+EnvironmentConfigError {
+  "errorCode": "environmentConfigError",
+  "message": "Environment variable EMAIL_INDEX is not set",
+  "name": "EnvironmentConfigError",
+}
+`;
+
+exports[`patch happy path should call DynamoDB update 1`] = `
+Array [
+  Array [
+    Object {
+      "ConditionExpression": "attribute_exists(PK)",
+      "ExpressionAttributeValues": Object {
+        ":d": "test-default-list-id",
+        ":f": "Full Name",
+        ":n": "Nickname",
+      },
+      "Key": Object {
+        "PK": "USER#testUserId",
+        "SK": "USER#testUserId",
+      },
+      "TableName": "test-table-name",
+      "UpdateExpression": "set fullName = :f, nickname = :n, preferences.defaultListId = :d",
+    },
+  ],
+]
+`;
+
+exports[`patch sad path - DynamoDB patch unknown error should throw an error 1`] = `[Error: error]`;
+
+exports[`patch sad path - user not found should log error 1`] = `
+Array [
+  Array [
+    Object {
+      "code": "ConditionalCheckFailedException",
+      "message": "The conditional request failed",
+      "name": "ConditionalCheckFailedException",
+      "time": 2022-01-01T00:00:00.000Z,
+    },
+  ],
+]
+`;
