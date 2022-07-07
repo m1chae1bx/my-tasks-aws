@@ -8,6 +8,8 @@ export enum ErrorCode {
   EMAIL_UNAVAILABLE = "emailUnavailable",
   REQUIRED_PROPERTY_MISSING = "requiredPropertyMissing",
   ENVIRONMENT_CONFIG_ERROR = "environmentConfigError",
+  ID_ALREADY_EXISTS = "idAlreadyExists",
+  TASK_NOT_FOUND_ERROR = "taskNotFound",
 }
 
 export class UsernameUnavailableError implements CustomError {
@@ -34,7 +36,7 @@ export class EnvironmentConfigError implements CustomError {
   errorCode = ErrorCode.ENVIRONMENT_CONFIG_ERROR;
 
   constructor(name: string) {
-    this.message = `Environment variable ${name} is not set`;
+    this.message = `Environment config ${name} is not set`;
   }
 }
 
@@ -45,5 +47,25 @@ export class RequiredPropertyMissingError implements CustomError {
 
   constructor(name: string) {
     this.message = `Property ${name} is required`;
+  }
+}
+
+export class IdAlreadyExistsError implements CustomError {
+  name = "IdAlreadyExistsError";
+  message;
+  errorCode = ErrorCode.ID_ALREADY_EXISTS;
+
+  constructor(entity: string) {
+    this.message = `${entity ? entity + " " : ""}ID already exists`;
+  }
+}
+
+export class TaskNotFoundError implements CustomError {
+  name = "TaskNotFoundError";
+  message;
+  errorCode = ErrorCode.TASK_NOT_FOUND_ERROR;
+
+  constructor(id: string) {
+    this.message = `Task with ID ${id} not found`;
   }
 }

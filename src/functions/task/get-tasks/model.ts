@@ -1,4 +1,4 @@
-import { GetTasksQuery } from "/opt/nodejs/task.model";
+import { DueDate, GetTasksQuery } from "/opt/nodejs/task.model";
 import { JSONSchemaType, ajv } from "/opt/nodejs/util";
 
 export interface GetTasksRequest {
@@ -30,7 +30,7 @@ export const getTasksRequestSchema: JSONSchemaType<GetTasksRequest> = {
         },
         dueDate: {
           type: "string",
-          enum: ["today", "tomorrow", "upcoming", "overdue", "unplanned"],
+          enum: Object.values(DueDate),
           nullable: true,
         },
         today: {
