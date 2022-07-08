@@ -3,8 +3,8 @@ import { AWSError } from "aws-sdk";
 import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
 import { PromiseResult } from "aws-sdk/lib/request";
 import { create, get, getByEmail, deleteUser, patch } from "./user.dao";
-
 import jwt from "jsonwebtoken";
+
 export interface UserDetails {
   id: string;
   email: string;
@@ -50,7 +50,7 @@ export class User implements UserDetails {
     return create(this);
   }
 
-  delete(): Promise<PromiseResult<DocumentClient.DeleteItemOutput, AWSError>> {
+  delete(): Promise<void> {
     return deleteUser(this.id);
   }
 
@@ -132,47 +132,3 @@ export class User implements UserDetails {
     return null;
   };
 }
-
-// User.prototype.update = function() {
-//   const user = {
-//     id: this.id,
-//     username: this.username,
-//     email: this.email,
-//     fullName: this.fullName,
-//     nickname: this.nickname,
-//     salt: this.salt,
-//     hash: this.hash,
-//     preferences: this.preferences
-//   };
-//   return UserDao.update(user);
-// };
-
-// User.prototype.patch = function() {
-//   const userPartial = {};
-//   Object.entries(this).forEach(([key, item]) => {
-//     if (this.hasOwnProperty(key) && item !== undefined) {
-//       userPartial[key] = item;
-//     }
-//   });
-//   return UserDao.patch(userPartial);
-// };
-
-// User.prototype.delete = function() {
-//   return UserDao.delete(this.id);
-// };
-
-// User.prototype.setPassword = function(password) {
-//   this.salt = crypto.randomBytes(16).toString("hex");
-//   this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, "sha512").toString("hex");
-// };
-
-// User.prototype.validatePassword = function(password) {
-//   const hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, "sha512").toString("hex");
-//   return this.hash === hash;
-// };
-
-// User.get = (id) => UserDao.get(id);
-// User.getByUsername = (username) => UserDao.getByUsername(username);
-// User.getByEmail = (email) => UserDao.getByEmail(email);
-
-// module.exports = User;

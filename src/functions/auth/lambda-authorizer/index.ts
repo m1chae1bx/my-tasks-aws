@@ -38,21 +38,21 @@ export const handler = async (
     );
   }
 
-  const token = event.authorizationToken.split(" ")[1];
   try {
+    const token = event.authorizationToken.split(" ")[1];
     const decodedToken = jwt.verify(token, jwtSecret);
     if (isUserDetailsPayload(decodedToken)) {
       response.principalId = decodedToken.id;
       response.context = {
         email: decodedToken.email,
       };
+    } else {
+      console.warn("JWT payload is not a UserDetailsPayload");
     }
     response.policyDocument.Statement[0].Effect = "Allow";
   } catch (error) {
     console.error("Error verifying token", error);
   }
-
-  console.log("response", response);
 
   return response;
 };

@@ -1,13 +1,16 @@
-import { APIGatewayProxyEventQueryStringParameters } from "aws-lambda";
-import { AWSError } from "aws-sdk";
 import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
-import { PromiseResult } from "aws-sdk/lib/request";
-import { GetTasksQuery, Task } from "./task.model";
+import {
+  EnvironmentConfigError,
+  IdAlreadyExistsError,
+  RequiredPropertyMissingError,
+  TaskNotFoundError,
+} from "../generic-layer/errors";
+import { DueDate, GetTasksQuery, TaskDetails } from "./task.model";
 import { dynamoClient, TABLE_NAME } from "/opt/nodejs/dynamo.config";
 import { isAWSError, uuid } from "/opt/nodejs/util";
 
-export const create = async (task: Task): Promise<string> => {
-  if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
+export const create = async (task: TaskDetails): Promise<string> => {
+  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
 
   const id = uuid();
   const item: {
@@ -42,7 +45,8 @@ export const create = async (task: Task): Promise<string> => {
     return id;
   } catch (error) {
     if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
-      error.message = `Task ${id} is already existing`;
+      console.error(error);
+      throw new IdAlreadyExistsError("Task");
     }
     throw error;
   }
@@ -50,11 +54,11 @@ export const create = async (task: Task): Promise<string> => {
 
 export const getAll = async (
   listId: string,
-  query: APIGatewayProxyEventQueryStringParameters & GetTasksQuery
-): Promise<PromiseResult<DocumentClient.QueryOutput, AWSError>> => {
-  if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
+  query: GetTasksQuery
+): Promise<TaskDetails[]> => {
+  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
 
-  let filterExpression = "";
+  const filterExpressionList = [];
   const expressionAttributeNames = {
     "#SK": "SK",
     "#name": "name",
@@ -70,29 +74,34 @@ export const getAll = async (
     ":SK": query.includeCompleted ? `TASK#` : `TASK#active#`,
   };
   if (query.name) {
-    filterExpression = "contains(nameSearch, :name)";
+    filterExpressionList.push("contains(nameSearch, :name)");
     expressionAttributeValues[":name"] = query.name.toLowerCase();
   }
   if (query.dueDate && query.today) {
     const date = new Date(query.today);
     const dueDate = query.dueDate;
-    if (filterExpression) filterExpression += " and ";
-    if (dueDate === "today") {
-      filterExpression += "dueDate = :dueDate";
-      expressionAttributeValues[":dueDate"] = date.toISOString();
-    } else if (dueDate === "tomorrow") {
-      date.setDate(date.getDate() + 1);
-      filterExpression += "dueDate = :dueDate";
-      expressionAttributeValues[":dueDate"] = date.toISOString();
-    } else if (dueDate === "upcoming") {
-      date.setDate(date.getDate() + 1);
-      filterExpression += "dueDate > :dueDate";
-      expressionAttributeValues[":dueDate"] = date.toISOString();
-    } else if (dueDate === "overdue") {
-      filterExpression += "dueDate < :dueDate";
-      expressionAttributeValues[":dueDate"] = date.toISOString();
-    } else if (dueDate === "unplanned") {
-      filterExpression += "attribute_not_exists(dueDate)";
+    switch (dueDate) {
+      case DueDate.TODAY:
+        filterExpressionList.push("dueDate = :dueDate");
+        expressionAttributeValues[":dueDate"] = date.toISOString();
+        break;
+      case DueDate.TOMORROW:
+        date.setDate(date.getDate() + 1);
+        filterExpressionList.push("dueDate = :dueDate");
+        expressionAttributeValues[":dueDate"] = date.toISOString();
+        break;
+      case DueDate.UPCOMING:
+        date.setDate(date.getDate() + 1);
+        filterExpressionList.push("dueDate > :dueDate");
+        expressionAttributeValues[":dueDate"] = date.toISOString();
+        break;
+      case DueDate.OVERDUE:
+        filterExpressionList.push("dueDate < :dueDate");
+        expressionAttributeValues[":dueDate"] = date.toISOString();
+        break;
+      case DueDate.UNPLANNED:
+        filterExpressionList.push("attribute_not_exists(dueDate)");
+        break;
     }
   }
 
@@ -104,30 +113,33 @@ export const getAll = async (
     ExpressionAttributeValues: expressionAttributeValues,
   };
 
-  if (filterExpression) params.FilterExpression = filterExpression;
+  if (filterExpressionList.length > 0) {
+    params.FilterExpression = filterExpressionList.join(" and ");
+  }
 
   const data = await dynamoClient.query(params).promise();
   if (data.Items) {
-    data.Items.map((item) => {
-      item.listId = listId;
-      return item;
+    return data.Items.map((item) => {
+      const task: TaskDetails = {
+        id: item.id,
+        name: item.name,
+        desc: item.desc,
+        isCompleted: item.isCompleted,
+        dueDate: item.dueDate,
+        listId: listId,
+      };
+      return task;
     });
   }
-  return data;
+  return [];
 };
 
-export const update = async (
-  task: Partial<Task>
-): Promise<
-  | PromiseResult<DocumentClient.TransactWriteItemsOutput, AWSError>
-  | PromiseResult<DocumentClient.PutItemOutput, AWSError>
-> => {
-  if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
-  if (!task.name) throw { message: "Name is required" };
+export const update = async (task: TaskDetails): Promise<void> => {
+  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
+  if (!task.id) throw new RequiredPropertyMissingError("id");
 
   const id = task.id;
   const listId = task.listId;
-  delete task.listId;
 
   if (task.isCompleted) {
     const params = {
@@ -155,7 +167,7 @@ export const update = async (
       ],
     };
 
-    return dynamoClient.transactWrite(params).promise();
+    await dynamoClient.transactWrite(params).promise();
   } else {
     const params = {
       TableName: TABLE_NAME,
@@ -168,7 +180,7 @@ export const update = async (
     };
 
     try {
-      return await dynamoClient.put(params).promise();
+      await dynamoClient.put(params).promise();
     } catch (error) {
       if (
         isAWSError(error) &&
@@ -198,18 +210,20 @@ export const update = async (
           ],
         };
         try {
-          return await dynamoClient.transactWrite(params).promise();
+          await dynamoClient.transactWrite(params).promise();
         } catch (error) {
           if (
             isAWSError(error) &&
             error.code === "ConditionalCheckFailedException"
           ) {
-            error.message = `Task ${id} of list ${listId} was not found`;
+            console.error(error);
+            throw new TaskNotFoundError(id);
           }
           throw error;
         }
+      } else {
+        throw error;
       }
-      throw error;
     }
   }
 };
@@ -217,8 +231,8 @@ export const update = async (
 export const deleteTask = async (
   taskId: string,
   listId: string
-): Promise<PromiseResult<DocumentClient.DeleteItemOutput, AWSError>> => {
-  if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
+): Promise<void> => {
+  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
 
   const params = {
     TableName: TABLE_NAME,
@@ -230,22 +244,27 @@ export const deleteTask = async (
   };
 
   try {
-    return await dynamoClient.delete(params).promise();
+    await dynamoClient.delete(params).promise();
   } catch (error) {
-    if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
-      params.Key.SK = `TASK#${taskId}`;
-      try {
-        await dynamoClient.delete(params).promise();
-      } catch (error) {
-        if (
-          isAWSError(error) &&
-          error.code === "ConditionalCheckFailedException"
-        ) {
-          error.message = `Task ${taskId} of list ${listId} was not found`;
-        }
-        throw error;
-      }
+    if (
+      !isAWSError(error) ||
+      error.code !== "ConditionalCheckFailedException"
+    ) {
+      throw error;
     }
-    throw error;
+
+    params.Key.SK = `TASK#${taskId}`;
+    try {
+      await dynamoClient.delete(params).promise();
+    } catch (error) {
+      if (
+        isAWSError(error) &&
+        error.code === "ConditionalCheckFailedException"
+      ) {
+        console.error(error);
+        throw new TaskNotFoundError(taskId);
+      }
+      throw error;
+    }
   }
 };

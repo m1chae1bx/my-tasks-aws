@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`delete-task happy path should return a success message 1`] = `"{\\"message\\":\\"Task test-task-id was deleted successfully\\"}"`;
+
+exports[`delete-task sad path - error while deleting task should return an error message 1`] = `"test error"`;
+
+exports[`delete-task sad path - invalid request should return errors 1`] = `"{\\"message\\":\\"Bad request\\",\\"errors\\":[{\\"keyword\\":\\"\\",\\"instancePath\\":\\"\\",\\"schemaPath\\":\\"\\",\\"params\\":{},\\"message\\":\\"test error\\"}]}"`;

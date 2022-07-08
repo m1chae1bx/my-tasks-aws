@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`create-task happy path should return a success message 1`] = `"{\\"message\\":\\"Task 'test-task-name' was created successfully\\",\\"id\\":\\"test-task-id\\"}"`;
+
+exports[`create-task sad path - error while saving task should return the error message 1`] = `"test error"`;
+
+exports[`create-task sad path - invalid request should return the validation errors 1`] = `"{\\"message\\":\\"Bad request\\",\\"errors\\":[{\\"keyword\\":\\"\\",\\"instancePath\\":\\"\\",\\"schemaPath\\":\\"\\",\\"params\\":{},\\"message\\":\\"test error\\"}]}"`;

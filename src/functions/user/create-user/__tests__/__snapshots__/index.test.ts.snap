@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`create-user happy path should return the user id 1`] = `"{\\"message\\":\\"User testUserId was created successfully\\",\\"id\\":\\"testUserId\\"}"`;
+
+exports[`create-user sad path - email unavailable should return an error message 1`] = `"{\\"name\\":\\"EmailUnavailableError\\",\\"message\\":\\"Email address is already registered\\",\\"errorCode\\":\\"emailUnavailable\\"}"`;
+
+exports[`create-user sad path - generic error should pass error to genericErrorHandler 1`] = `
+Array [
+  Array [
+    [Error: generic error],
+    "An error occurred while creating the user. Please try again later.",
+  ],
+]
+`;
+
+exports[`create-user sad path - invalid request should return the validation errors 1`] = `"{\\"message\\":\\"Bad request\\",\\"errors\\":[{\\"instancePath\\":\\"/body/password\\",\\"schemaPath\\":\\"#/properties/body/properties/password/minLength\\",\\"keyword\\":\\"minLength\\",\\"params\\":{\\"limit\\":8},\\"message\\":\\"must NOT have fewer than 8 characters\\"},{\\"instancePath\\":\\"/body/password\\",\\"schemaPath\\":\\"#/properties/body/properties/password/pattern\\",\\"keyword\\":\\"pattern\\",\\"params\\":{\\"pattern\\":\\"^(?=[^A-Za-z]*[A-Za-z])(?=[^0-9]*[0-9])(?=[^@#$%&!_:\\\\\\\\-.]*[@#$%&!_:\\\\\\\\-.]).*\\"},\\"message\\":\\"must match pattern \\\\\\"^(?=[^A-Za-z]*[A-Za-z])(?=[^0-9]*[0-9])(?=[^@#$%&!_:\\\\\\\\-.]*[@#$%&!_:\\\\\\\\-.]).*\\\\\\"\\"}]}"`;
+
+exports[`create-user sad path - username unavailable error on catch should return an error message 1`] = `"{\\"name\\":\\"UsernameUnavailableError\\",\\"message\\":\\"Username is already taken\\",\\"errorCode\\":\\"usernameUnavailable\\"}"`;
+
+exports[`create-user sad path - username unavailable on get should return an error message 1`] = `"{\\"name\\":\\"UsernameUnavailableError\\",\\"message\\":\\"Username is already taken\\",\\"errorCode\\":\\"usernameUnavailable\\"}"`;

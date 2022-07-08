@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lambda-authorizer sad path - JWT payload is not UserDetailsPayload should log warning 1`] = `
+Array [
+  Array [
+    "JWT payload is not a UserDetailsPayload",
+  ],
+]
+`;
+
+exports[`lambda-authorizer sad path - error verifying token should log error 1`] = `
+Array [
+  Array [
+    "Error verifying token",
+    [Error: test-error],
+  ],
+]
+`;
+
+exports[`lambda-authorizer sad path - no JWT_SECRET should return an error 1`] = `[Error: JWT_SECRET environment variable is not set in Lambda function test-lambda-function-name]`;

@@ -1,10 +1,16 @@
-import { APIGatewayProxyEventQueryStringParameters } from "aws-lambda";
-import { AWSError } from "aws-sdk";
-import { DocumentClient } from "aws-sdk/clients/dynamodb";
-import { PromiseResult } from "aws-sdk/lib/request";
 import { create, deleteTask, getAll, update } from "./task.dao";
+import { RequiredPropertyMissingError } from "/opt/nodejs/errors";
 
-export class Task {
+export interface TaskDetails {
+  id?: string;
+  listId: string;
+  name: string;
+  isCompleted: boolean;
+  dueDate?: Date;
+  desc?: string;
+}
+
+export class Task implements TaskDetails {
   id?: string;
   listId: string;
   name: string;
@@ -28,15 +34,13 @@ export class Task {
     this.desc = desc;
   }
 
-  save(): Promise<string> {
-    return create(this);
+  async save(): Promise<string> {
+    this.id = await create(this);
+    return this.id;
   }
 
-  update(): Promise<
-    | PromiseResult<DocumentClient.TransactWriteItemsOutput, AWSError>
-    | PromiseResult<DocumentClient.PutItemOutput, AWSError>
-  > {
-    if (!this.id) throw { message: "Invalid task ID" };
+  update(): Promise<void> {
+    if (!this.id) throw new RequiredPropertyMissingError("id");
     const task = {
       id: this.id,
       listId: this.listId,
@@ -50,22 +54,27 @@ export class Task {
 
   static getAll = async (
     listId: string,
-    query: APIGatewayProxyEventQueryStringParameters & GetTasksQuery
-  ): Promise<PromiseResult<DocumentClient.QueryOutput, AWSError>> => {
+    query: GetTasksQuery
+  ): Promise<TaskDetails[]> => {
     return getAll(listId, query);
   };
 
-  static delete = async (
-    taskId: string,
-    listId: string
-  ): Promise<PromiseResult<DocumentClient.DeleteItemOutput, AWSError>> => {
-    return deleteTask(taskId, listId);
+  static delete = async (taskId: string, listId: string): Promise<void> => {
+    await deleteTask(taskId, listId);
   };
 }
 
 export interface GetTasksQuery {
   name?: string;
-  dueDate?: string;
+  dueDate?: DueDate;
   today?: string;
   includeCompleted?: "true";
+}
+
+export enum DueDate {
+  TODAY = "today",
+  TOMORROW = "tomorrow",
+  UPCOMING = "upcoming",
+  OVERDUE = "overdue",
+  UNPLANNED = "unplanned",
 }

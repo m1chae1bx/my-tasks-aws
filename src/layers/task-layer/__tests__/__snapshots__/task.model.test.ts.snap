@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Task object methods update - happy path should call TaskDao.update 1`] = `
+Array [
+  Array [
+    Object {
+      "desc": "Test task description",
+      "dueDate": 2022-01-01T00:00:00.000Z,
+      "id": "test-task-id",
+      "isCompleted": false,
+      "listId": "test-list-id",
+      "name": "Test task",
+    },
+  ],
+]
+`;
+
+exports[`Task static delete should call TaskDao.delete 1`] = `
+Array [
+  Array [
+    "test-task-id",
+    "test-list-id",
+  ],
+]
+`;

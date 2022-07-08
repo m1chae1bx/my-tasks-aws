@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "es2021",
+    "types": ["node", "jest"],
+    "lib": ["es2021"],
+    "module": "commonjs",
+    "resolveJsonModule": true,
+    "allowJs": false,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "baseUrl": "src",
+    "paths": {
+      "/opt/nodejs/dynamo.config": ["layers/dynamo-layer/dynamo.config"],
+      "/opt/nodejs/user.model": ["layers/user-layer/user.model"],
+      "/opt/nodejs/list.model": ["layers/list-layer/list.model"],
+      "/opt/nodejs/task.model": ["layers/task-layer/task.model"],
+      "/opt/nodejs/util": ["layers/generic-layer/util"],
+      "/opt/nodejs/errors": ["layers/generic-layer/errors"],
+      "@test-utils/*": ["test-utils/*"]
+    }
+  },
+  "include": ["src/**/*", "jest.config.ts"]
+}

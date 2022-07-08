@@ -1,0 +1,153 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`create sad path - DynamoDB put unknown error should throw an error 1`] = `[Error: test-error]`;
+
+exports[`create sad path - ID already exists should log an error 1`] = `
+Array [
+  Array [
+    Object {
+      "code": "ConditionalCheckFailedException",
+    },
+  ],
+]
+`;
+
+exports[`deleteTask delete active task unknown error should throw an error 1`] = `[Error: test error]`;
+
+exports[`deleteTask delete completed task unknown error should throw an error 1`] = `[Error: test error]`;
+
+exports[`deleteTask happy path - delete active task should call DynamoDB delete operation 1`] = `
+Array [
+  Array [
+    Object {
+      "ConditionExpression": "attribute_exists(PK)",
+      "Key": Object {
+        "PK": "LIST#test-list-id",
+        "SK": "TASK#active#test-task-id",
+      },
+      "TableName": "test-table-name",
+    },
+  ],
+]
+`;
+
+exports[`deleteTask happy path - delete completed task should call DynamoDB delete operation 1`] = `
+Array [
+  Array [
+    Object {
+      "ConditionExpression": "attribute_exists(PK)",
+      "Key": Object {
+        "PK": "LIST#test-list-id",
+        "SK": "TASK#test-task-id",
+      },
+      "TableName": "test-table-name",
+    },
+  ],
+  Array [
+    Object {
+      "ConditionExpression": "attribute_exists(PK)",
+      "Key": Object {
+        "PK": "LIST#test-list-id",
+        "SK": "TASK#test-task-id",
+      },
+      "TableName": "test-table-name",
+    },
+  ],
+]
+`;
+
+exports[`update happy path - active task should call DynamoDB put 1`] = `
+Array [
+  Array [
+    Object {
+      "ConditionExpression": "attribute_exists(PK)",
+      "Item": Object {
+        "PK": "LIST#test-list-id",
+        "SK": "TASK#active#test-task-id",
+        "desc": "Test task description",
+        "dueDate": 2022-01-01T00:00:00.000Z,
+        "id": "test-task-id",
+        "isCompleted": false,
+        "listId": "test-list-id",
+        "name": "Test task",
+      },
+      "TableName": "test-table-name",
+    },
+  ],
+]
+`;
+
+exports[`update happy path - task completed should call DynamoDB transactWrite 1`] = `
+Array [
+  Array [
+    Object {
+      "TransactItems": Array [
+        Object {
+          "Delete": Object {
+            "Key": Object {
+              "PK": "LIST#test-list-id",
+              "SK": "TASK#active#test-task-id",
+            },
+            "TableName": "test-table-name",
+          },
+        },
+        Object {
+          "Put": Object {
+            "Item": Object {
+              "PK": "LIST#test-list-id",
+              "SK": "TASK#test-task-id",
+              "desc": "Test task description",
+              "dueDate": 2022-01-01T00:00:00.000Z,
+              "id": "test-task-id",
+              "isCompleted": true,
+              "listId": "test-list-id",
+              "name": "Test task",
+              "nameSearch": "test task",
+            },
+            "TableName": "test-table-name",
+          },
+        },
+      ],
+    },
+  ],
+]
+`;
+
+exports[`update happy path - task reopened should call DynamoDB transactWrite 1`] = `
+Array [
+  Array [
+    Object {
+      "TransactItems": Array [
+        Object {
+          "Delete": Object {
+            "Key": Object {
+              "PK": "LIST#test-list-id",
+              "SK": "TASK#test-task-id",
+            },
+            "TableName": "test-table-name",
+          },
+        },
+        Object {
+          "Put": Object {
+            "Item": Object {
+              "PK": "LIST#test-list-id",
+              "SK": "TASK#active#test-task-id",
+              "desc": "Test task description",
+              "dueDate": 2022-01-01T00:00:00.000Z,
+              "id": "test-task-id",
+              "isCompleted": false,
+              "listId": "test-list-id",
+              "name": "Test task",
+            },
+            "TableName": "test-table-name",
+          },
+        },
+      ],
+    },
+  ],
+]
+`;
+
+exports[`update sad path - failed updating active task should throw an error 1`] = `[Error: test error]`;
+
+exports[`update sad path - failed updating reopened task should throw an error 1`] = `[Error: test error]`;

@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`get-list happy path should return the list 1`] = `"[[{\\"id\\":\\"dfab1ffd-d3f3-4c45-b39a-46fcfd32fe7d\\",\\"name\\":\\"List 1\\",\\"userId\\":\\"testUserId\\",\\"isDefault\\":false},{\\"id\\":\\"7a7a528c-142f-4b77-a168-8d6b8b56e40e\\",\\"name\\":\\"List 2\\",\\"userId\\":\\"testUserId\\",\\"isDefault\\":false}]]"`;
+
+exports[`get-list sad path - error getting the lists should return the error 1`] = `"test error"`;
+
+exports[`get-list sad path - invalid request should return the error 1`] = `"{\\"message\\":\\"Bad Request\\",\\"errors\\":[{\\"keyword\\":\\"\\",\\"instancePath\\":\\"\\",\\"schemaPath\\":\\"\\",\\"params\\":{},\\"message\\":\\"test error\\"}]}"`;

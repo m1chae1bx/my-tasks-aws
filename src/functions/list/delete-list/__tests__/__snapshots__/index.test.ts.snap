@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`delete-list happy path should return a success message 1`] = `"{\\"message\\":\\"List testListId was deleted successfully\\"}"`;
+
+exports[`delete-list sad path - error while deleting the list should return an error message 1`] = `"test error"`;
+
+exports[`delete-list sad path - invalid request should return errors 1`] = `"{\\"message\\":\\"Bad request\\",\\"errors\\":[{\\"keyword\\":\\"\\",\\"instancePath\\":\\"\\",\\"schemaPath\\":\\"\\",\\"params\\":{},\\"message\\":\\"test error\\"}]}"`;

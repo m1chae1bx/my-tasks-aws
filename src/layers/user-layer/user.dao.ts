@@ -8,10 +8,15 @@ import {
 } from "/opt/nodejs/dynamo.config";
 import { User, UserDetails } from "./user.model";
 import { isAWSError } from "/opt/nodejs/util";
+import {
+  EnvironmentConfigError,
+  RequiredPropertyMissingError,
+  UsernameUnavailableError,
+  UserNotFoundError,
+} from "/opt/nodejs/errors";
 
 export const create = async (user: UserDetails): Promise<string> => {
-  if (!user) throw { message: "Empty user object" };
-  if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
+  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
 
   const params = {
     TableName: TABLE_NAME,
@@ -24,21 +29,19 @@ export const create = async (user: UserDetails): Promise<string> => {
   };
 
   try {
-    await dynamoClient.put(params).promise(); // TODO why am I not returning the promise as with other functions
+    await dynamoClient.put(params).promise();
     return user.id;
   } catch (error) {
     if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
-      error.message = `User ${user.id} is already existing`;
+      console.error(error);
+      throw new UsernameUnavailableError();
     }
     throw error;
   }
 };
 
-export const deleteUser = async (
-  id: string
-): Promise<PromiseResult<DocumentClient.DeleteItemOutput, AWSError>> => {
-  if (!id) throw { message: "ID is required" };
-  if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
+export const deleteUser = async (id: string): Promise<void> => {
+  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
 
   const params = {
     TableName: TABLE_NAME,
@@ -50,10 +53,12 @@ export const deleteUser = async (
   };
 
   try {
-    return dynamoClient.delete(params).promise();
+    await dynamoClient.delete(params).promise();
   } catch (error) {
+    console.log("hello world");
     if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
-      error.message = `User ${id} was not found`;
+      console.error(error);
+      throw new UserNotFoundError();
     }
     throw error;
   }
@@ -62,16 +67,8 @@ export const deleteUser = async (
 export const patch = async (
   userPartial: Partial<User>
 ): Promise<PromiseResult<DocumentClient.UpdateItemOutput, AWSError>> => {
-  if (!userPartial) throw { message: "Empty user object" };
-  if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
-
-  let id: string;
-  if (!userPartial.id) {
-    throw { message: "ID is required" };
-  } else {
-    id = userPartial.id;
-    delete userPartial.id;
-  }
+  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
+  if (!userPartial.id) throw new RequiredPropertyMissingError("id");
 
   let updateExpression = "set";
   const expressionAttributeValues: {
@@ -97,8 +94,8 @@ export const patch = async (
   const params = {
     TableName: TABLE_NAME,
     Key: {
-      PK: `USER#${id}`,
-      SK: `USER#${id}`,
+      PK: `USER#${userPartial.id}`,
+      SK: `USER#${userPartial.id}`,
     },
     UpdateExpression: updateExpression,
     ExpressionAttributeValues: expressionAttributeValues,
@@ -109,10 +106,8 @@ export const patch = async (
     return await dynamoClient.update(params).promise();
   } catch (error) {
     if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
-      error.message = `User ${id} was not found`;
-    }
-    if (isAWSError(error) && error.code === "ValidationException") {
-      error.message = "Invalid user object";
+      console.error(error);
+      throw new UserNotFoundError();
     }
     throw error;
   }
@@ -121,8 +116,7 @@ export const patch = async (
 export const get = async (
   id: string
 ): Promise<DocumentClient.AttributeMap | undefined> => {
-  if (!id) throw { message: "ID is required" };
-  if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
+  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
 
   const params = {
     TableName: TABLE_NAME,
@@ -144,8 +138,8 @@ export const get = async (
 export const getByEmail = async (
   email: string
 ): Promise<DocumentClient.AttributeMap | undefined> => {
-  if (!email) throw { message: "Email is required" };
-  if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
+  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
+  if (!EMAIL_INDEX) throw new EnvironmentConfigError("EMAIL_INDEX");
 
   const params = {
     TableName: TABLE_NAME,
@@ -158,5 +152,5 @@ export const getByEmail = async (
   };
 
   const data = await dynamoClient.query(params).promise();
-  return data && data.Items ? data.Items[0] : undefined;
+  return data.Items ? data.Items[0] : undefined;
 };
