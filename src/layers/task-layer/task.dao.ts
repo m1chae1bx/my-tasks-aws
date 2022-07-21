@@ -1,16 +1,15 @@
 import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
 import {
-  EnvironmentConfigError,
   IdAlreadyExistsError,
   RequiredPropertyMissingError,
   TaskNotFoundError,
 } from "../generic-layer/errors";
 import { DueDate, GetTasksQuery, TaskDetails } from "./task.model";
-import { dynamoClient, TABLE_NAME } from "/opt/nodejs/dynamo.config";
+import { dynamoClient, getTableName } from "/opt/nodejs/dynamo.config";
 import { isAWSError, uuid } from "/opt/nodejs/util";
 
 export const create = async (task: TaskDetails): Promise<string> => {
-  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
+  const tableName = getTableName();
 
   const id = uuid();
   const item: {
@@ -35,7 +34,7 @@ export const create = async (task: TaskDetails): Promise<string> => {
   if (task.desc) item.desc = task.desc;
 
   const params = {
-    TableName: TABLE_NAME,
+    TableName: tableName,
     Item: item,
     ConditionExpression: "attribute_not_exists(PK)",
   };
@@ -56,7 +55,7 @@ export const getAll = async (
   listId: string,
   query: GetTasksQuery
 ): Promise<TaskDetails[]> => {
-  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
+  const tableName = getTableName();
 
   const filterExpressionList = [];
   const expressionAttributeNames = {
@@ -106,7 +105,7 @@ export const getAll = async (
   }
 
   const params: DocumentClient.QueryInput = {
-    TableName: TABLE_NAME,
+    TableName: tableName,
     KeyConditionExpression: "PK = :PK and begins_with(#SK, :SK)",
     ProjectionExpression: "id, #name, #desc, isCompleted, dueDate",
     ExpressionAttributeNames: expressionAttributeNames,
@@ -135,9 +134,9 @@ export const getAll = async (
 };
 
 export const update = async (task: TaskDetails): Promise<void> => {
-  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
   if (!task.id) throw new RequiredPropertyMissingError("id");
 
+  const tableName = getTableName();
   const id = task.id;
   const listId = task.listId;
 
@@ -146,7 +145,7 @@ export const update = async (task: TaskDetails): Promise<void> => {
       TransactItems: [
         {
           Delete: {
-            TableName: TABLE_NAME,
+            TableName: tableName,
             Key: {
               PK: `LIST#${listId}`,
               SK: `TASK#active#${id}`,
@@ -155,7 +154,7 @@ export const update = async (task: TaskDetails): Promise<void> => {
         },
         {
           Put: {
-            TableName: TABLE_NAME,
+            TableName: tableName,
             Item: {
               PK: `LIST#${listId}`,
               SK: `TASK#${id}`,
@@ -170,7 +169,7 @@ export const update = async (task: TaskDetails): Promise<void> => {
     await dynamoClient.transactWrite(params).promise();
   } else {
     const params = {
-      TableName: TABLE_NAME,
+      TableName: tableName,
       Item: {
         PK: `LIST#${listId}`,
         SK: `TASK#active#${id}`,
@@ -190,7 +189,7 @@ export const update = async (task: TaskDetails): Promise<void> => {
           TransactItems: [
             {
               Delete: {
-                TableName: TABLE_NAME,
+                TableName: tableName,
                 Key: {
                   PK: `LIST#${listId}`,
                   SK: `TASK#${id}`,
@@ -199,7 +198,7 @@ export const update = async (task: TaskDetails): Promise<void> => {
             },
             {
               Put: {
-                TableName: TABLE_NAME,
+                TableName: tableName,
                 Item: {
                   PK: `LIST#${listId}`,
                   SK: `TASK#active#${id}`,
@@ -232,10 +231,10 @@ export const deleteTask = async (
   taskId: string,
   listId: string
 ): Promise<void> => {
-  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
+  const tableName = getTableName();
 
   const params = {
-    TableName: TABLE_NAME,
+    TableName: tableName,
     Key: {
       PK: `LIST#${listId}`,
       SK: `TASK#active#${taskId}`,

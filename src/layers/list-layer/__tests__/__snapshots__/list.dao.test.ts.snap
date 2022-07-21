@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`deleteList happy path should call DynamoDB delete 1`] = `
+Array [
+  Array [
+    Object {
+      "ConditionExpression": "attribute_exists(PK)",
+      "Key": Object {
+        "PK": "USER#test-user-id",
+        "SK": "LIST#test-list-id",
+      },
+      "TableName": "test-table-name",
+    },
+  ],
+]
+`;
