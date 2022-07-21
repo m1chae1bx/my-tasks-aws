@@ -10,6 +10,7 @@ export enum ErrorCode {
   ENVIRONMENT_CONFIG_ERROR = "environmentConfigError",
   ID_ALREADY_EXISTS = "idAlreadyExists",
   TASK_NOT_FOUND_ERROR = "taskNotFound",
+  LIST_NOT_FOUND = "listNotFound",
 }
 
 export class UsernameUnavailableError implements CustomError {
@@ -67,5 +68,15 @@ export class TaskNotFoundError implements CustomError {
 
   constructor(id: string) {
     this.message = `Task with ID ${id} not found`;
+  }
+}
+
+export class ListNotFoundError implements CustomError {
+  name = "ListNotFoundError";
+  message;
+  errorCode = ErrorCode.LIST_NOT_FOUND;
+
+  constructor(id: string) {
+    this.message = `List with ID ${id} not found`;
   }
 }

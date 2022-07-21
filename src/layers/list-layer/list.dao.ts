@@ -1,100 +1,107 @@
 import { isAWSError, uuid } from "/opt/nodejs/util";
-import { dynamoClient, TABLE_NAME } from "/opt/nodejs/dynamo.config";
-import { List } from "./list.model";
-import { AWSError } from "aws-sdk";
-import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
-import { PromiseResult } from "aws-sdk/lib/request";
+import { dynamoClient, getTableName } from "/opt/nodejs/dynamo.config";
+import { ListDetails } from "./list.model";
+import {
+  IdAlreadyExistsError,
+  ListNotFoundError,
+} from "../generic-layer/errors";
 
-export const create = async (
-  list: List
-): Promise<
-  | PromiseResult<DocumentClient.PutItemOutput, AWSError>
-  | PromiseResult<DocumentClient.TransactWriteItemsOutput, AWSError>
-  | string
-> => {
-  if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
-
-  const { name, userId, isDefault } = list;
+export const create = async (list: ListDetails): Promise<string> => {
+  const tableName = getTableName();
   const id = uuid();
 
-  if (isDefault) {
-    const params = {
-      TransactItems: [
-        {
-          Put: {
-            TableName: TABLE_NAME,
-            Item: {
-              PK: `USER#${userId}`,
-              SK: `LIST#${id}`,
-              id: id,
-              name: name,
-            },
-            ConditionExpression: "attribute_not_exists(PK)",
-          },
-        },
-        {
-          Update: {
-            TableName: TABLE_NAME,
-            Key: {
-              PK: `USER#${userId}`,
-              SK: `USER#${userId}`,
-            },
-            UpdateExpression: "set preferences.defaultListId = :id",
-            ExpressionAttributeValues: {
-              ":id": id,
-            },
-          },
-        },
-      ],
-    };
-
-    try {
-      await dynamoClient.transactWrite(params).promise();
-      return id;
-    } catch (error) {
-      if (
-        isAWSError(error) &&
-        error.code === "ConditionalCheckFailedException"
-      ) {
-        error.message = `List ${id} is already existing`;
-      }
-      throw error;
-    }
+  if (list.isDefault) {
+    return createDefaultList(id, list, tableName);
   } else {
-    const params = {
-      TableName: TABLE_NAME,
-      Item: {
-        PK: `USER#${userId}`,
-        SK: `LIST#${id}`,
-        id: id,
-        name: name,
-      },
-      ConditionExpression: "attribute_not_exists(PK)",
-    };
-
-    try {
-      await dynamoClient.put(params).promise();
-      return id;
-    } catch (error) {
-      if (
-        isAWSError(error) &&
-        error.code === "ConditionalCheckFailedException"
-      ) {
-        error.message = `List ${id} is already existing`;
-      }
-      throw error;
-    }
+    return createList(id, list, tableName);
   }
 };
 
-export const deleteList = (
+const createDefaultList = async (
+  id: string,
+  list: ListDetails,
+  tableName: string
+): Promise<string> => {
+  const { name, userId } = list;
+  const params = {
+    TransactItems: [
+      {
+        Put: {
+          TableName: tableName,
+          Item: {
+            PK: `USER#${userId}`,
+            SK: `LIST#${id}`,
+            id: id,
+            name: name,
+          },
+          ConditionExpression: "attribute_not_exists(PK)",
+        },
+      },
+      {
+        Update: {
+          TableName: tableName,
+          Key: {
+            PK: `USER#${userId}`,
+            SK: `USER#${userId}`,
+          },
+          UpdateExpression: "set preferences.defaultListId = :id",
+          ExpressionAttributeValues: {
+            ":id": id,
+          },
+        },
+      },
+    ],
+  };
+
+  try {
+    await dynamoClient.transactWrite(params).promise();
+    return id;
+  } catch (error) {
+    if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
+      console.error(error);
+      throw new IdAlreadyExistsError("List");
+    }
+    throw error;
+  }
+};
+
+const createList = async (
+  id: string,
+  list: ListDetails,
+  tableName: string
+): Promise<string> => {
+  const { name, userId } = list;
+  const params = {
+    TableName: tableName,
+    Item: {
+      PK: `USER#${userId}`,
+      SK: `LIST#${id}`,
+      id: id,
+      name: name,
+    },
+    ConditionExpression: "attribute_not_exists(PK)",
+  };
+
+  try {
+    await dynamoClient.put(params).promise();
+    return id;
+  } catch (error) {
+    if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
+      console.error(error);
+      throw new IdAlreadyExistsError("List");
+    }
+    throw error;
+  }
+};
+
+export const deleteList = async (
   listId: string,
   userId: string
-): Promise<PromiseResult<DocumentClient.DeleteItemOutput, AWSError>> => {
-  if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
+): Promise<void> => {
+  const tableName = getTableName();
 
   const params = {
-    TableName: TABLE_NAME,
+    TableName: tableName,
     Key: {
       PK: `USER#${userId}`,
       SK: `LIST#${listId}`,
@@ -103,22 +110,21 @@ export const deleteList = (
   };
 
   try {
-    return dynamoClient.delete(params).promise();
+    await dynamoClient.delete(params).promise();
   } catch (error) {
     if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
-      error.message = `List ${listId} of user ${userId} was not found`;
+      console.error(error);
+      throw new ListNotFoundError(listId);
     }
     throw error;
   }
 };
 
-export const getAll = async (
-  userId: string
-): Promise<PromiseResult<DocumentClient.QueryOutput, AWSError>> => {
-  if (!TABLE_NAME) throw { message: "Invalid DynamoDB table name" };
+export const getAll = async (userId: string): Promise<ListDetails[]> => {
+  const tableName = getTableName();
 
   const params = {
-    TableName: TABLE_NAME,
+    TableName: tableName,
     KeyConditionExpression: "PK = :PK and begins_with(#SK, :SK)",
     ProjectionExpression: "id, #name",
     ExpressionAttributeNames: {
@@ -131,5 +137,18 @@ export const getAll = async (
     },
   };
 
-  return dynamoClient.query(params).promise();
+  const data = await dynamoClient.query(params).promise();
+  if (data.Items) {
+    return data.Items.map((item) => {
+      console.log(item);
+      const list: ListDetails = {
+        id: item.id,
+        name: item.name,
+        userId: item.userId,
+        isDefault: item.isDefault,
+      };
+      return list;
+    });
+  }
+  return [];
 };

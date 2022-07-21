@@ -1,9 +1,13 @@
-import { AWSError } from "aws-sdk";
-import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
-import { PromiseResult } from "aws-sdk/lib/request";
 import { create, deleteList, getAll } from "./list.dao";
 
-export class List {
+export interface ListDetails {
+  id?: string;
+  name: string;
+  userId: string;
+  isDefault: boolean;
+}
+
+export class List implements ListDetails {
   id?: string;
   name: string;
   userId: string;
@@ -16,40 +20,15 @@ export class List {
     this.isDefault = isDefault;
   }
 
-  save(): Promise<
-    | string
-    | PromiseResult<DocumentClient.PutItemOutput, AWSError>
-    | PromiseResult<DocumentClient.TransactWriteItemsOutput, AWSError>
-  > {
+  save(): Promise<string> {
     return create(this);
   }
 
-  static delete = async (
-    listId: string,
-    userId: string
-  ): Promise<PromiseResult<DocumentClient.DeleteItemOutput, AWSError>> => {
-    return deleteList(listId, userId);
+  static delete = async (listId: string, userId: string): Promise<void> => {
+    await deleteList(listId, userId);
   };
 
-  static getAll = (
-    userId: string
-  ): Promise<PromiseResult<DocumentClient.QueryOutput, AWSError>> =>
-    getAll(userId);
+  static getAll = (userId: string): Promise<ListDetails[]> => {
+    return getAll(userId);
+  };
 }
-
-// List.prototype.update = function() {
-//   const list = {
-//     id: this.id,
-//     name: this.name,
-//     userId: this.userId
-//   };
-//   return ListDao.update(list);
-// }
-
-// List.prototype.delete = function() {
-//   return ListDao.delete(this.id, this.userId);
-// };
-
-// List.get = (id, userId) => ListDao.get(id, userId);
-
-// module.exports = List;
