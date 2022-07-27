@@ -3,23 +3,22 @@ import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
 import { PromiseResult } from "aws-sdk/lib/request";
 import {
   dynamoClient,
-  TABLE_NAME,
   EMAIL_INDEX,
+  getTableName,
 } from "/opt/nodejs/dynamo.config";
 import { User, UserDetails } from "./user.model";
 import { isAWSError } from "/opt/nodejs/util";
 import {
-  EnvironmentConfigError,
   RequiredPropertyMissingError,
   UsernameUnavailableError,
   UserNotFoundError,
 } from "/opt/nodejs/errors";
 
 export const create = async (user: UserDetails): Promise<string> => {
-  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
+  const tableName = getTableName();
 
   const params = {
-    TableName: TABLE_NAME,
+    TableName: tableName,
     Item: {
       PK: `USER#${user.id}`,
       SK: `USER#${user.id}`,
@@ -41,10 +40,10 @@ export const create = async (user: UserDetails): Promise<string> => {
 };
 
 export const deleteUser = async (id: string): Promise<void> => {
-  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
+  const tableName = getTableName();
 
   const params = {
-    TableName: TABLE_NAME,
+    TableName: tableName,
     Key: {
       PK: `USER#${id}`,
       SK: `USER#${id}`,
@@ -55,7 +54,6 @@ export const deleteUser = async (id: string): Promise<void> => {
   try {
     await dynamoClient.delete(params).promise();
   } catch (error) {
-    console.log("hello world");
     if (isAWSError(error) && error.code === "ConditionalCheckFailedException") {
       console.error(error);
       throw new UserNotFoundError();
@@ -67,7 +65,7 @@ export const deleteUser = async (id: string): Promise<void> => {
 export const patch = async (
   userPartial: Partial<User>
 ): Promise<PromiseResult<DocumentClient.UpdateItemOutput, AWSError>> => {
-  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
+  const tableName = getTableName();
   if (!userPartial.id) throw new RequiredPropertyMissingError("id");
 
   let updateExpression = "set";
@@ -92,7 +90,7 @@ export const patch = async (
   updateExpression = updateExpression.slice(0, -1);
 
   const params = {
-    TableName: TABLE_NAME,
+    TableName: tableName,
     Key: {
       PK: `USER#${userPartial.id}`,
       SK: `USER#${userPartial.id}`,
@@ -116,10 +114,10 @@ export const patch = async (
 export const get = async (
   id: string
 ): Promise<DocumentClient.AttributeMap | undefined> => {
-  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
+  const tableName = getTableName();
 
   const params = {
-    TableName: TABLE_NAME,
+    TableName: tableName,
     Key: {
       PK: `USER#${id}`,
       SK: `USER#${id}`,
@@ -138,11 +136,10 @@ export const get = async (
 export const getByEmail = async (
   email: string
 ): Promise<DocumentClient.AttributeMap | undefined> => {
-  if (!TABLE_NAME) throw new EnvironmentConfigError("TABLE_NAME");
-  if (!EMAIL_INDEX) throw new EnvironmentConfigError("EMAIL_INDEX");
+  const tableName = getTableName();
 
   const params = {
-    TableName: TABLE_NAME,
+    TableName: tableName,
     IndexName: EMAIL_INDEX,
     KeyConditionExpression: "email = :email",
     ExpressionAttributeValues: {

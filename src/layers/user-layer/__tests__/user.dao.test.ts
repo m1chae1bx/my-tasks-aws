@@ -1,49 +1,35 @@
 import { conditionalCheckFailedException } from "@test-utils/base-objects";
 import { testUserInit } from "../test-data/test-user-init";
+import { dynamoClient } from "/opt/nodejs/dynamo.config";
 import {
   EnvironmentConfigError,
   ErrorCode,
   RequiredPropertyMissingError,
   UserNotFoundError,
 } from "/opt/nodejs/errors";
+import * as UserDao from "../user.dao";
+
+jest.mock("/opt/nodejs/dynamo.config", () => ({
+  dynamoClient: {
+    put: jest.fn(),
+    delete: jest.fn(),
+    update: jest.fn(),
+    get: jest.fn(),
+    query: jest.fn(),
+  },
+  getTableName: jest.fn().mockReturnValue("test-table-name"),
+  EMAIL_INDEX: "test-email-index",
+}));
 
 describe("create", () => {
   describe("happy path", () => {
     it("should return the user ID", async () => {
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        dynamoClient: {
-          put: jest.fn().mockReturnValueOnce({
-            promise: jest.fn().mockResolvedValueOnce(null),
-          }),
-        },
-        TABLE_NAME: "test-table-name",
-      }));
-      const userDao = await import("../user.dao");
-      const result = await userDao.create(testUserInit);
+      (dynamoClient.put as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockResolvedValueOnce(null),
+      });
+
+      const result = await UserDao.create(testUserInit);
       expect(result).toBe(testUserInit.id);
-    });
-  });
-
-  describe("sad path - DynamoDB table undefined", () => {
-    it("should throw a EnvironmentConfigError error", async () => {
-      let err: unknown;
-
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        TABLE_NAME: undefined,
-      }));
-
-      try {
-        const userDao = await import("../user.dao");
-        await userDao.create(testUserInit);
-      } catch (error) {
-        err = error;
-      }
-
-      expect((err as EnvironmentConfigError).errorCode).toBe(
-        ErrorCode.ENVIRONMENT_CONFIG_ERROR
-      );
     });
   });
 
@@ -51,25 +37,18 @@ describe("create", () => {
     let err: unknown;
 
     beforeAll(async () => {
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        dynamoClient: {
-          put: jest.fn().mockReturnValueOnce({
-            promise: jest
-              .fn()
-              .mockRejectedValueOnce(conditionalCheckFailedException),
-          }),
-        },
-        TABLE_NAME: "test-table-name",
-      }));
+      (dynamoClient.put as jest.Mock).mockReturnValueOnce({
+        promise: jest
+          .fn()
+          .mockRejectedValueOnce(conditionalCheckFailedException),
+      });
       jest
         .spyOn(console, "error")
         .mockClear()
         .mockImplementationOnce(jest.fn());
 
       try {
-        const userDao = await import("../user.dao");
-        await userDao.create(testUserInit);
+        await UserDao.create(testUserInit);
       } catch (error) {
         err = error;
       }
@@ -88,23 +67,16 @@ describe("create", () => {
     it("should throw an error", async () => {
       let err: unknown;
 
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        dynamoClient: {
-          put: jest.fn().mockReturnValueOnce({
-            promise: jest.fn().mockRejectedValueOnce(new Error("error")),
-          }),
-        },
-        TABLE_NAME: "test-table-name",
-      }));
+      (dynamoClient.put as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockRejectedValueOnce(new Error("error")),
+      });
       jest
         .spyOn(console, "error")
         .mockClear()
         .mockImplementationOnce(jest.fn());
 
       try {
-        const userDao = await import("../user.dao");
-        await userDao.create(testUserInit);
+        await UserDao.create(testUserInit);
       } catch (error) {
         err = error;
       }
@@ -117,47 +89,13 @@ describe("create", () => {
 describe("deleteUser", () => {
   describe("happy path", () => {
     it("should call DynamoDB delete", async () => {
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        dynamoClient: {
-          delete: jest.fn().mockReturnValueOnce({
-            promise: jest.fn().mockResolvedValueOnce(null),
-          }),
-        },
-        TABLE_NAME: "test-table-name",
-      }));
+      (dynamoClient.delete as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockResolvedValueOnce(null),
+      });
       const dynamoConfig = await import("/opt/nodejs/dynamo.config");
-      const userDao = await import("../user.dao");
-      await userDao.deleteUser(testUserInit.id);
-      expect(
-        (dynamoConfig.dynamoClient.delete as jest.Mock).mock.calls
-      ).toMatchSnapshot();
-    });
-  });
 
-  describe("sad path - DynamoDB table undefined", () => {
-    it("should throw a EnvironmentConfigError error", async () => {
-      let err: unknown;
-
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        TABLE_NAME: undefined,
-      }));
-      jest
-        .spyOn(console, "error")
-        .mockClear()
-        .mockImplementationOnce(jest.fn());
-
-      try {
-        const userDao = await import("../user.dao");
-        await userDao.deleteUser(testUserInit.id);
-      } catch (error) {
-        err = error;
-      }
-
-      expect((err as EnvironmentConfigError).errorCode).toBe(
-        ErrorCode.ENVIRONMENT_CONFIG_ERROR
-      );
+      await UserDao.deleteUser(testUserInit.id);
+      expect((dynamoClient.delete as jest.Mock).mock.calls).toMatchSnapshot();
     });
   });
 
@@ -165,24 +103,17 @@ describe("deleteUser", () => {
     let err: unknown;
 
     beforeAll(async () => {
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        dynamoClient: {
-          delete: jest.fn().mockReturnValueOnce({
-            promise: jest
-              .fn()
-              .mockRejectedValueOnce(conditionalCheckFailedException),
-          }),
-        },
-        TABLE_NAME: "test-table-name",
-      }));
+      (dynamoClient.delete as jest.Mock).mockReturnValueOnce({
+        promise: jest
+          .fn()
+          .mockRejectedValueOnce(conditionalCheckFailedException),
+      });
       jest
         .spyOn(console, "error")
         .mockClear()
         .mockImplementationOnce(jest.fn());
       try {
-        const userDao = await import("../user.dao");
-        await userDao.deleteUser(testUserInit.id);
+        await UserDao.deleteUser(testUserInit.id);
       } catch (error) {
         err = error;
       }
@@ -203,23 +134,16 @@ describe("deleteUser", () => {
     it("should throw an error", async () => {
       let err: unknown;
 
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        dynamoClient: {
-          delete: jest.fn().mockReturnValueOnce({
-            promise: jest.fn().mockRejectedValueOnce(new Error("error")),
-          }),
-        },
-        TABLE_NAME: "test-table-name",
-      }));
+      (dynamoClient.delete as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockRejectedValueOnce(new Error("error")),
+      });
       jest
         .spyOn(console, "error")
         .mockClear()
         .mockImplementationOnce(jest.fn());
 
       try {
-        const userDao = await import("../user.dao");
-        await userDao.deleteUser(testUserInit.id);
+        await UserDao.deleteUser(testUserInit.id);
       } catch (error) {
         err = error;
       }
@@ -231,47 +155,13 @@ describe("deleteUser", () => {
 describe("patch", () => {
   describe("happy path", () => {
     it("should call DynamoDB update", async () => {
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        dynamoClient: {
-          update: jest.fn().mockReturnValueOnce({
-            promise: jest.fn().mockResolvedValueOnce(null),
-          }),
-        },
-        TABLE_NAME: "test-table-name",
-      }));
+      (dynamoClient.update as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockResolvedValueOnce(null),
+      });
       const dynamoConfig = await import("/opt/nodejs/dynamo.config");
-      const userDao = await import("../user.dao");
-      await userDao.patch(testUserInit);
-      expect(
-        (dynamoConfig.dynamoClient.update as jest.Mock).mock.calls
-      ).toMatchSnapshot();
-    });
-  });
 
-  describe("sad path - DynamoDB table undefined", () => {
-    it("should throw a EnvironmentConfigError error", async () => {
-      let err: unknown;
-
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        TABLE_NAME: undefined,
-      }));
-      jest
-        .spyOn(console, "error")
-        .mockClear()
-        .mockImplementationOnce(jest.fn());
-
-      try {
-        const userDao = await import("../user.dao");
-        await userDao.patch(testUserInit);
-      } catch (error) {
-        err = error;
-      }
-
-      expect((err as EnvironmentConfigError).errorCode).toBe(
-        ErrorCode.ENVIRONMENT_CONFIG_ERROR
-      );
+      await UserDao.patch(testUserInit);
+      expect((dynamoClient.update as jest.Mock).mock.calls).toMatchSnapshot();
     });
   });
 
@@ -279,18 +169,13 @@ describe("patch", () => {
     it("should throw a RequiredPropertyMissingError error", async () => {
       let err: unknown;
 
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        TABLE_NAME: "test-table-name",
-      }));
       jest
         .spyOn(console, "error")
         .mockClear()
         .mockImplementationOnce(jest.fn());
 
       try {
-        const userDao = await import("../user.dao");
-        await userDao.patch({ ...testUserInit, id: undefined });
+        await UserDao.patch({ ...testUserInit, id: undefined });
       } catch (error) {
         err = error;
       }
@@ -305,24 +190,18 @@ describe("patch", () => {
     let err: unknown;
 
     beforeAll(async () => {
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        dynamoClient: {
-          update: jest.fn().mockReturnValueOnce({
-            promise: jest
-              .fn()
-              .mockRejectedValueOnce(conditionalCheckFailedException),
-          }),
-        },
-        TABLE_NAME: "test-table-name",
-      }));
+      (dynamoClient.update as jest.Mock).mockReturnValueOnce({
+        promise: jest
+          .fn()
+          .mockRejectedValueOnce(conditionalCheckFailedException),
+      });
       jest
         .spyOn(console, "error")
         .mockClear()
         .mockImplementationOnce(jest.fn());
-      const userDao = await import("../user.dao");
+
       try {
-        await userDao.patch(testUserInit);
+        await UserDao.patch(testUserInit);
       } catch (error) {
         err = error;
       }
@@ -343,23 +222,16 @@ describe("patch", () => {
     it("should throw an error", async () => {
       let err: unknown;
 
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        dynamoClient: {
-          update: jest.fn().mockReturnValueOnce({
-            promise: jest.fn().mockRejectedValueOnce(new Error("error")),
-          }),
-        },
-        TABLE_NAME: "test-table-name",
-      }));
+      (dynamoClient.update as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockRejectedValueOnce(new Error("error")),
+      });
       jest
         .spyOn(console, "error")
         .mockClear()
         .mockImplementationOnce(jest.fn());
 
       try {
-        const userDao = await import("../user.dao");
-        await userDao.patch(testUserInit);
+        await UserDao.patch(testUserInit);
       } catch (error) {
         err = error;
       }
@@ -371,40 +243,13 @@ describe("patch", () => {
 describe("get", () => {
   describe("happy path", () => {
     it("should return the user", async () => {
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        dynamoClient: {
-          get: jest.fn().mockReturnValueOnce({
-            promise: jest.fn().mockResolvedValueOnce({
-              Item: testUserInit,
-            }),
-          }),
-        },
-        TABLE_NAME: "test-table-name",
-      }));
-      const userDao = await import("../user.dao");
-      expect(await userDao.get(testUserInit.id)).toMatchSnapshot();
-    });
-  });
+      (dynamoClient.get as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockResolvedValueOnce({
+          Item: testUserInit,
+        }),
+      });
 
-  describe("sad path - DynamoDB table undefined", () => {
-    it("should throw a EnvironmentConfigError error", async () => {
-      let err: unknown;
-
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        TABLE_NAME: undefined,
-      }));
-      const userDao = await import("../user.dao");
-      try {
-        await userDao.get(testUserInit.id);
-      } catch (error) {
-        err = error;
-      }
-
-      expect((err as EnvironmentConfigError).errorCode).toBe(
-        ErrorCode.ENVIRONMENT_CONFIG_ERROR
-      );
+      expect(await UserDao.get(testUserInit.id)).toMatchSnapshot();
     });
   });
 
@@ -412,18 +257,12 @@ describe("get", () => {
     it("should throw an error", async () => {
       let err: unknown;
 
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        dynamoClient: {
-          get: jest.fn().mockReturnValueOnce({
-            promise: jest.fn().mockRejectedValueOnce(new Error("error")),
-          }),
-        },
-        TABLE_NAME: "test-table-name",
-      }));
-      const userDao = await import("../user.dao");
+      (dynamoClient.get as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockRejectedValueOnce(new Error("error")),
+      });
+
       try {
-        await userDao.get(testUserInit.id);
+        await UserDao.get(testUserInit.id);
       } catch (error) {
         err = error;
       }
@@ -435,63 +274,13 @@ describe("get", () => {
 describe("getByEmail", () => {
   describe("happy path", () => {
     it("should return the user", async () => {
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        dynamoClient: {
-          query: jest.fn().mockReturnValueOnce({
-            promise: jest.fn().mockResolvedValueOnce({
-              Items: [testUserInit],
-            }),
-          }),
-        },
-        TABLE_NAME: "test-table-name",
-        EMAIL_INDEX: "test-email-index",
-      }));
-      const userDao = await import("../user.dao");
-      expect(await userDao.getByEmail(testUserInit.email)).toMatchSnapshot();
-    });
-  });
+      (dynamoClient.query as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockResolvedValueOnce({
+          Items: [testUserInit],
+        }),
+      });
 
-  describe("sad path - DynamoDB table undefined", () => {
-    it("should throw a EnvironmentConfigError error", async () => {
-      let err: unknown;
-
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        TABLE_NAME: undefined,
-      }));
-      const userDao = await import("../user.dao");
-      try {
-        await userDao.getByEmail(testUserInit.email);
-      } catch (error) {
-        err = error;
-      }
-
-      expect((err as EnvironmentConfigError).errorCode).toBe(
-        ErrorCode.ENVIRONMENT_CONFIG_ERROR
-      );
-    });
-  });
-
-  describe("sad path - DynamoDB index undefined", () => {
-    it("should throw a EnvironmentConfigError error", async () => {
-      let err: unknown;
-
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        TABLE_NAME: "test-table-name",
-        EMAIL_INDEX: undefined,
-      }));
-      const userDao = await import("../user.dao");
-      try {
-        await userDao.getByEmail(testUserInit.email);
-      } catch (error) {
-        err = error;
-      }
-
-      expect((err as EnvironmentConfigError).errorCode).toBe(
-        ErrorCode.ENVIRONMENT_CONFIG_ERROR
-      );
+      expect(await UserDao.getByEmail(testUserInit.email)).toMatchSnapshot();
     });
   });
 
@@ -499,18 +288,12 @@ describe("getByEmail", () => {
     it("should throw an error", async () => {
       let err: unknown;
 
-      jest.resetModules();
-      jest.doMock("/opt/nodejs/dynamo.config", () => ({
-        dynamoClient: {
-          query: jest.fn().mockReturnValueOnce({
-            promise: jest.fn().mockRejectedValueOnce(new Error("error")),
-          }),
-        },
-        TABLE_NAME: "test-table-name",
-      }));
-      const userDao = await import("../user.dao");
+      (dynamoClient.query as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockRejectedValueOnce(new Error("error")),
+      });
+
       try {
-        await userDao.getByEmail(testUserInit.email);
+        await UserDao.getByEmail(testUserInit.email);
       } catch (error) {
         err = error;
       }
