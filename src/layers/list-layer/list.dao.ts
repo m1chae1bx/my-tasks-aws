@@ -140,7 +140,6 @@ export const getAll = async (userId: string): Promise<ListDetails[]> => {
   const data = await dynamoClient.query(params).promise();
   if (data.Items) {
     return data.Items.map((item) => {
-      console.log(item);
       const list: ListDetails = {
         id: item.id,
         name: item.name,

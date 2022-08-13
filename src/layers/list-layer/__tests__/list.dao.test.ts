@@ -56,6 +56,7 @@ describe("create", () => {
         }),
       });
       (isAWSError as unknown as jest.Mock).mockReturnValueOnce(true);
+      jest.spyOn(console, "error").mockImplementation(jest.fn());
       await expect(
         create({
           ...testList,
@@ -94,6 +95,7 @@ describe("create", () => {
         }),
       });
       (isAWSError as unknown as jest.Mock).mockReturnValueOnce(true);
+      jest.spyOn(console, "error").mockImplementation(jest.fn());
       await expect(
         create({
           ...testList,
@@ -145,6 +147,7 @@ describe("deleteList", () => {
         }),
       });
       (isAWSError as unknown as jest.Mock).mockReturnValueOnce(true);
+      jest.spyOn(console, "error").mockImplementation(jest.fn());
       await expect(deleteList("test-list-id", testList.userId)).rejects.toEqual(
         expect.objectContaining({
           errorCode: ErrorCode.LIST_NOT_FOUND,
