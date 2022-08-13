@@ -16,6 +16,13 @@ jest.useFakeTimers().setSystemTime(new Date("2022-01-01"));
 describe("Task", () => {
   describe("constructor", () => {
     it("should initialize a task", () => {
+      const { listId, name } = testTask;
+      const task = new Task(listId, name);
+      expect(task.listId).toBe(listId);
+      expect(task.name).toBe(name);
+    });
+
+    it("should initialize a task with optional params", () => {
       const { id, listId, name, isCompleted, dueDate, desc } = testTask;
       const task = new Task(
         listId,

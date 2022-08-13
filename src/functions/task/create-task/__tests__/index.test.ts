@@ -58,6 +58,24 @@ describe("create-task", () => {
     });
   });
 
+  describe("sad path - invalid request (no body)", () => {
+    let result: APIGatewayProxyResult;
+
+    beforeAll(async () => {
+      (validateRequest as unknown as jest.Mock).mockReturnValueOnce(false);
+      validateRequest.errors = ajvError;
+      result = await handler({ ...createTaskEvent, body: null });
+    });
+
+    it("should return a 400 response", () => {
+      expect(result.statusCode).toBe(400);
+    });
+
+    it("should return the validation errors", () => {
+      expect(result.body).toMatchSnapshot();
+    });
+  });
+
   describe("sad path - error while saving task", () => {
     let result: APIGatewayProxyResult;
 

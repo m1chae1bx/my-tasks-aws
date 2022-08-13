@@ -4,4 +4,6 @@ exports[`patch-user happy path should return a success message 1`] = `"{\\"messa
 
 exports[`patch-user sad path - error while patching user should return an error message 1`] = `"test error"`;
 
+exports[`patch-user sad path - invalid request (no body) should return errors 1`] = `"{\\"message\\":\\"Bad request\\",\\"errors\\":[{\\"keyword\\":\\"\\",\\"instancePath\\":\\"\\",\\"schemaPath\\":\\"\\",\\"params\\":{},\\"message\\":\\"test error\\"}]}"`;
+
 exports[`patch-user sad path - invalid request should return errors 1`] = `"{\\"message\\":\\"Bad request\\",\\"errors\\":[{\\"keyword\\":\\"\\",\\"instancePath\\":\\"\\",\\"schemaPath\\":\\"\\",\\"params\\":{},\\"message\\":\\"test error\\"}]}"`;

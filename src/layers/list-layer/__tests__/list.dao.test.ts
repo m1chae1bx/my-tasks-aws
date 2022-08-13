@@ -56,6 +56,7 @@ describe("create", () => {
         }),
       });
       (isAWSError as unknown as jest.Mock).mockReturnValueOnce(true);
+      jest.spyOn(console, "error").mockImplementation(jest.fn());
       await expect(
         create({
           ...testList,
@@ -94,6 +95,7 @@ describe("create", () => {
         }),
       });
       (isAWSError as unknown as jest.Mock).mockReturnValueOnce(true);
+      jest.spyOn(console, "error").mockImplementation(jest.fn());
       await expect(
         create({
           ...testList,
@@ -145,6 +147,7 @@ describe("deleteList", () => {
         }),
       });
       (isAWSError as unknown as jest.Mock).mockReturnValueOnce(true);
+      jest.spyOn(console, "error").mockImplementation(jest.fn());
       await expect(deleteList("test-list-id", testList.userId)).rejects.toEqual(
         expect.objectContaining({
           errorCode: ErrorCode.LIST_NOT_FOUND,
@@ -183,7 +186,7 @@ describe("getAll", () => {
     it("should return an empty list", async () => {
       (dynamoClient.query as jest.Mock).mockReturnValueOnce({
         promise: jest.fn().mockResolvedValueOnce({
-          Items: [],
+          Items: undefined,
         }),
       });
       const result = await getAll(testList.userId);

@@ -56,6 +56,101 @@ Array [
 ]
 `;
 
+exports[`getAll happy path - due date overdue should call DynamoDB query 1`] = `
+Array [
+  Array [
+    Object {
+      "ExpressionAttributeNames": Object {
+        "#SK": "SK",
+        "#desc": "desc",
+        "#name": "name",
+      },
+      "ExpressionAttributeValues": Object {
+        ":PK": "LIST#test-list-id",
+        ":SK": "TASK#",
+        ":dueDate": "2020-01-01T00:00:00.000Z",
+        ":name": "test task",
+      },
+      "FilterExpression": "contains(nameSearch, :name) and dueDate < :dueDate",
+      "KeyConditionExpression": "PK = :PK and begins_with(#SK, :SK)",
+      "ProjectionExpression": "id, #name, #desc, isCompleted, dueDate",
+      "TableName": "test-table-name",
+    },
+  ],
+]
+`;
+
+exports[`getAll happy path - due date tomorrow should call DynamoDB query 1`] = `
+Array [
+  Array [
+    Object {
+      "ExpressionAttributeNames": Object {
+        "#SK": "SK",
+        "#desc": "desc",
+        "#name": "name",
+      },
+      "ExpressionAttributeValues": Object {
+        ":PK": "LIST#test-list-id",
+        ":SK": "TASK#",
+        ":dueDate": "2020-01-02T00:00:00.000Z",
+        ":name": "test task",
+      },
+      "FilterExpression": "contains(nameSearch, :name) and dueDate = :dueDate",
+      "KeyConditionExpression": "PK = :PK and begins_with(#SK, :SK)",
+      "ProjectionExpression": "id, #name, #desc, isCompleted, dueDate",
+      "TableName": "test-table-name",
+    },
+  ],
+]
+`;
+
+exports[`getAll happy path - due date unplanned should call DynamoDB query 1`] = `
+Array [
+  Array [
+    Object {
+      "ExpressionAttributeNames": Object {
+        "#SK": "SK",
+        "#desc": "desc",
+        "#name": "name",
+      },
+      "ExpressionAttributeValues": Object {
+        ":PK": "LIST#test-list-id",
+        ":SK": "TASK#",
+        ":name": "test task",
+      },
+      "FilterExpression": "contains(nameSearch, :name) and attribute_not_exists(dueDate)",
+      "KeyConditionExpression": "PK = :PK and begins_with(#SK, :SK)",
+      "ProjectionExpression": "id, #name, #desc, isCompleted, dueDate",
+      "TableName": "test-table-name",
+    },
+  ],
+]
+`;
+
+exports[`getAll happy path - due date upcoming should call DynamoDB query 1`] = `
+Array [
+  Array [
+    Object {
+      "ExpressionAttributeNames": Object {
+        "#SK": "SK",
+        "#desc": "desc",
+        "#name": "name",
+      },
+      "ExpressionAttributeValues": Object {
+        ":PK": "LIST#test-list-id",
+        ":SK": "TASK#",
+        ":dueDate": "2020-01-02T00:00:00.000Z",
+        ":name": "test task",
+      },
+      "FilterExpression": "contains(nameSearch, :name) and dueDate > :dueDate",
+      "KeyConditionExpression": "PK = :PK and begins_with(#SK, :SK)",
+      "ProjectionExpression": "id, #name, #desc, isCompleted, dueDate",
+      "TableName": "test-table-name",
+    },
+  ],
+]
+`;
+
 exports[`update happy path - active task should call DynamoDB put 1`] = `
 Array [
   Array [

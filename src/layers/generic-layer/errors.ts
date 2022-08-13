@@ -57,7 +57,7 @@ export class IdAlreadyExistsError implements CustomError {
   errorCode = ErrorCode.ID_ALREADY_EXISTS;
 
   constructor(entity: string) {
-    this.message = `${entity ? entity + " " : ""}ID already exists`;
+    this.message = `${entity} ID already exists`;
   }
 }
 

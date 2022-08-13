@@ -27,9 +27,9 @@ export const create = async (task: TaskDetails): Promise<string> => {
     id: id,
     name: task.name,
     nameSearch: task.name.toLowerCase(),
+    isCompleted: false,
   };
 
-  if (task.isCompleted) item.isCompleted = task.isCompleted;
   if (task.dueDate) item.dueDate = task.dueDate;
   if (task.desc) item.desc = task.desc;
 

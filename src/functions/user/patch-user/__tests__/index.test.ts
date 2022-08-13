@@ -58,6 +58,25 @@ describe("patch-user", () => {
     });
   });
 
+  describe("sad path - invalid request (no body)", () => {
+    let result: APIGatewayProxyResult;
+
+    beforeAll(async () => {
+      (validateRequest as unknown as jest.Mock).mockReturnValueOnce(false);
+      validateRequest.errors = ajvError;
+      result = await handler({ ...patchUserEvent, body: null });
+    });
+
+    it("should return a 400 status code", () => {
+      expect(result.statusCode).toBe(400);
+    });
+
+    it("should return errors", () => {
+      expect(result.body).toMatchSnapshot();
+      expect(result.body).toContain(ajvError[0].message);
+    });
+  });
+
   describe("sad path - error while patching user", () => {
     let result: APIGatewayProxyResult;
 
