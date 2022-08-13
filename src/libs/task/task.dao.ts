@@ -3,10 +3,10 @@ import {
   IdAlreadyExistsError,
   RequiredPropertyMissingError,
   TaskNotFoundError,
-} from "../generic-layer/errors";
+} from "@libs/generic/errors";
 import { DueDate, GetTasksQuery, TaskDetails } from "./task.model";
-import { dynamoClient, getTableName } from "/opt/nodejs/dynamo.config";
-import { isAWSError, uuid } from "/opt/nodejs/util";
+import { dynamoClient, getTableName } from "@libs/dynamodb";
+import { isAWSError, uuid } from "@libs/generic/util";
 
 export const create = async (task: TaskDetails): Promise<string> => {
   const tableName = getTableName();
@@ -53,7 +53,7 @@ export const create = async (task: TaskDetails): Promise<string> => {
 
 export const getAll = async (
   listId: string,
-  query: GetTasksQuery
+  query: GetTasksQuery | null
 ): Promise<TaskDetails[]> => {
   const tableName = getTableName();
 
@@ -70,13 +70,13 @@ export const getAll = async (
     ":dueDate"?: string;
   } = {
     ":PK": `LIST#${listId}`,
-    ":SK": query.includeCompleted ? `TASK#` : `TASK#active#`,
+    ":SK": query?.includeCompleted ? `TASK#` : `TASK#active#`,
   };
-  if (query.name) {
+  if (query?.name) {
     filterExpressionList.push("contains(nameSearch, :name)");
     expressionAttributeValues[":name"] = query.name.toLowerCase();
   }
-  if (query.dueDate && query.today) {
+  if (query && query.dueDate && query.today) {
     const date = new Date(query.today);
     const dueDate = query.dueDate;
     switch (dueDate) {

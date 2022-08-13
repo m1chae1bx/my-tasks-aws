@@ -1,4 +1,4 @@
-import { JSONSchemaType, ajv } from "/opt/nodejs/util";
+import { JSONSchemaType, ajv } from "@libs/generic/util";
 
 export interface LoginRequest {
   body: {

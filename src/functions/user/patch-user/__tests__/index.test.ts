@@ -3,20 +3,20 @@ import { APIGatewayProxyResult } from "aws-lambda";
 import { handler } from "../index";
 import { validateRequest } from "../model";
 import { patchUserEvent } from "../test-data/patch-user-event";
-import { User } from "/opt/nodejs/user.model";
-import { genericErrorHandler } from "/opt/nodejs/util";
+import { User } from "@libs/user";
+import { genericErrorHandler } from "@libs/generic/util";
 
 jest.mock("../model", () => ({
   validateRequest: jest.fn(),
 }));
 
-jest.mock("/opt/nodejs/user.model", () => ({
+jest.mock("@libs/user", () => ({
   User: {
     patch: jest.fn(),
   },
 }));
 
-jest.mock("/opt/nodejs/util", () => ({
+jest.mock("@libs/generic/util", () => ({
   genericErrorHandler: jest.fn(),
 }));
 

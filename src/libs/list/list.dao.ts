@@ -1,10 +1,7 @@
-import { isAWSError, uuid } from "/opt/nodejs/util";
-import { dynamoClient, getTableName } from "/opt/nodejs/dynamo.config";
+import { isAWSError, uuid } from "@libs/generic/util";
+import { dynamoClient, getTableName } from "@libs/dynamodb";
 import { ListDetails } from "./list.model";
-import {
-  IdAlreadyExistsError,
-  ListNotFoundError,
-} from "../generic-layer/errors";
+import { IdAlreadyExistsError, ListNotFoundError } from "@libs/generic/errors";
 
 export const create = async (list: ListDetails): Promise<string> => {
   const tableName = getTableName();

@@ -1,20 +1,20 @@
 import { handler } from "../index";
 import { loginEvent } from "../test-data/login-event";
 import { validateRequest } from "../model";
-import { User } from "/opt/nodejs/user.model";
+import { User } from "@libs/user";
 import { APIGatewayProxyResult } from "aws-lambda";
 import { ajvError } from "@test-utils/base-objects";
-import { genericErrorHandler } from "/opt/nodejs/util";
+import { genericErrorHandler } from "@libs/generic/util";
 
 jest.mock("../model", () => ({
   validateRequest: jest.fn(),
 }));
 
-jest.mock("/opt/nodejs/user.model", () => ({
+jest.mock("@libs/user", () => ({
   User: { get: jest.fn() },
 }));
 
-jest.mock("/opt/nodejs/util", () => ({
+jest.mock("@libs/generic/util", () => ({
   genericErrorHandler: jest.fn(),
 }));
 

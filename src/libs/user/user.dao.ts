@@ -1,18 +1,14 @@
 import { AWSError } from "aws-sdk";
 import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
 import { PromiseResult } from "aws-sdk/lib/request";
-import {
-  dynamoClient,
-  EMAIL_INDEX,
-  getTableName,
-} from "/opt/nodejs/dynamo.config";
+import { dynamoClient, EMAIL_INDEX, getTableName } from "@libs/dynamodb";
 import { User, UserDetails } from "./user.model";
-import { isAWSError } from "/opt/nodejs/util";
+import { isAWSError } from "@libs/generic/util";
 import {
   RequiredPropertyMissingError,
   UsernameUnavailableError,
   UserNotFoundError,
-} from "/opt/nodejs/errors";
+} from "@libs/generic/errors";
 
 export const create = async (user: UserDetails): Promise<string> => {
   const tableName = getTableName();

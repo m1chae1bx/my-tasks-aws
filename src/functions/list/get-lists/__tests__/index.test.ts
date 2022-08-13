@@ -4,20 +4,20 @@ import { handler } from "..";
 import { validateRequest } from "../model";
 import { getListEvent } from "../test-data/get-list-event";
 import { testLists } from "../test-data/test-lists";
-import { List } from "/opt/nodejs/list.model";
-import { genericErrorHandler } from "/opt/nodejs/util";
+import { List } from "@libs/list";
+import { genericErrorHandler } from "@libs/generic/util";
 
 jest.mock("../model", () => ({
   validateRequest: jest.fn(),
 }));
 
-jest.mock("/opt/nodejs/list.model", () => ({
+jest.mock("@libs/list", () => ({
   List: {
     getAll: jest.fn(),
   },
 }));
 
-jest.mock("/opt/nodejs/util", () => ({
+jest.mock("@libs/generic/util", () => ({
   genericErrorHandler: jest.fn(),
 }));
 

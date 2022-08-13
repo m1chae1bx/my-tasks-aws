@@ -74,9 +74,7 @@ jobs:
 
       - run: npm install
       - run: npm run pre-build
-      - run: npm run compile
-      - run: npm run build -- --template ${SAM_TEMPLATE} --use-container
-      - run: npm run post-build
+      - run: npm run build -- --template ${SAM_TEMPLATE}
 
       - name: Assume the testing pipeline user role
         uses: aws-actions/configure-aws-credentials@v1
@@ -111,10 +109,7 @@ jobs:
       - uses: aws-actions/setup-sam@v1
 
       - run: npm install
-      - run: npm run pre-build
-      - run: npm run compile
       - run: npm run build -- --template ${SAM_TEMPLATE} --use-container
-      - run: npm run post-build
 
       - name: Assume the testing pipeline user role
         uses: aws-actions/configure-aws-credentials@v1

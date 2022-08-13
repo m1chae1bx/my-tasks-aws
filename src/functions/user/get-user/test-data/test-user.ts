@@ -1,4 +1,4 @@
-import { User } from "/opt/nodejs/user.model";
+import { User } from "@libs/user";
 
 export const testUser: Partial<User> = {
   fullName: "Full Name",

@@ -1,4 +1,4 @@
-import { Task } from "/opt/nodejs/task.model";
+import { Task } from "@libs/task";
 
 export const testTasks: Partial<Task>[] = [
   {

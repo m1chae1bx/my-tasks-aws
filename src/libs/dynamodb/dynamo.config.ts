@@ -1,5 +1,5 @@
 import * as AWS from "aws-sdk";
-import { EnvironmentConfigError } from "../generic-layer/errors";
+import { EnvironmentConfigError } from "@libs/generic/errors";
 
 AWS.config.update({ region: "ap-southeast-1" });
 
@@ -16,4 +16,5 @@ const getTableName = (): string => {
   }
   return process.env.MY_TASKS_TABLE;
 };
+
 export { dynamoClient, TABLE_NAME, EMAIL_INDEX, getTableName };

@@ -1,7 +1,7 @@
 import { Task } from "../task.model";
 import { testTask } from "../test-data";
 import * as TaskDao from "../task.dao";
-import { ErrorCode, RequiredPropertyMissingError } from "/opt/nodejs/errors";
+import { ErrorCode, RequiredPropertyMissingError } from "@libs/generic/errors";
 
 jest.mock("../task.dao", () => ({
   ...jest.requireActual("../task.dao"),

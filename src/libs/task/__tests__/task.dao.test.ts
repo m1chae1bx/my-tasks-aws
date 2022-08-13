@@ -4,13 +4,13 @@ import {
   testTask,
   testTasks,
 } from "../test-data";
-import { dynamoClient } from "/opt/nodejs/dynamo.config";
-import { CustomError, ErrorCode } from "/opt/nodejs/errors";
+import { dynamoClient } from "@libs/dynamodb";
+import { CustomError, ErrorCode } from "@libs/generic/errors";
 import * as TaskDao from "../task.dao";
-import { isAWSError } from "/opt/nodejs/util";
+import { isAWSError } from "@libs/generic/util";
 import { DueDate } from "../task.model";
 
-jest.mock("/opt/nodejs/dynamo.config", () => ({
+jest.mock("@libs/dynamodb", () => ({
   dynamoClient: {
     put: jest.fn(),
     delete: jest.fn(),
@@ -20,8 +20,8 @@ jest.mock("/opt/nodejs/dynamo.config", () => ({
   getTableName: jest.fn().mockReturnValue("test-table-name"),
 }));
 
-jest.mock("/opt/nodejs/util", () => ({
-  ...jest.requireActual("/opt/nodejs/util"),
+jest.mock("@libs/generic/util", () => ({
+  ...jest.requireActual("@libs/generic/util"),
   isAWSError: jest.fn(),
   uuid: jest.fn().mockReturnValue("test-uuid"),
 }));

@@ -1,5 +1,5 @@
 import { baseAPIGatewayProxyEvent } from "@test-utils/base-objects";
-import { UserDetails } from "/opt/nodejs/user.model";
+import { UserDetails } from "@libs/user";
 
 export const createUserEvent = {
   ...baseAPIGatewayProxyEvent,

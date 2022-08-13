@@ -1,4 +1,4 @@
-import { List } from "/opt/nodejs/list.model";
+import { List } from "@libs/list";
 
 export const testLists: Partial<List>[] = [
   {
