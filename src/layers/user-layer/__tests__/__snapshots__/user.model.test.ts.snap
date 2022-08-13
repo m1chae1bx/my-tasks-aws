@@ -35,7 +35,19 @@ User {
 }
 `;
 
-exports[`User static getByEmail - happy path should return a user 1`] = `null`;
+exports[`User static getByEmail - happy path should return a user 1`] = `
+User {
+  "email": "test@email.com",
+  "fullName": "Full Name",
+  "hash": "test-hash",
+  "id": "testUserId",
+  "nickname": "Nickname",
+  "preferences": Object {
+    "defaultListId": "test-default-list-id",
+  },
+  "salt": "test-salt",
+}
+`;
 
 exports[`User static patch should call user DAO patch 1`] = `
 Array [

@@ -4,4 +4,6 @@ exports[`create-list happy path should return the list id 1`] = `"{\\"message\\"
 
 exports[`create-list sad path - error while saving list should return the error message 1`] = `"test error"`;
 
+exports[`create-list sad path - invalid request (no body) should return the validation errors 1`] = `"{\\"message\\":\\"Bad request\\",\\"errors\\":[{\\"keyword\\":\\"\\",\\"instancePath\\":\\"\\",\\"schemaPath\\":\\"\\",\\"params\\":{},\\"message\\":\\"test error\\"}]}"`;
+
 exports[`create-list sad path - invalid request should return the validation errors 1`] = `"{\\"message\\":\\"Bad request\\",\\"errors\\":[{\\"keyword\\":\\"\\",\\"instancePath\\":\\"\\",\\"schemaPath\\":\\"\\",\\"params\\":{},\\"message\\":\\"test error\\"}]}"`;

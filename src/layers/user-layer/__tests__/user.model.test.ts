@@ -186,7 +186,7 @@ describe("User", () => {
   describe("static getByEmail - happy path", () => {
     it("should return a user", async () => {
       (UserDao.getByEmail as jest.Mock).mockResolvedValueOnce(testUserInit);
-      const result = await User.get("test-email");
+      const result = await User.getByEmail("test-email");
       expect(result).toMatchSnapshot();
     });
   });
@@ -194,7 +194,7 @@ describe("User", () => {
   describe("static getByEmail - user does not exist", () => {
     it("should return null", async () => {
       (UserDao.getByEmail as jest.Mock).mockResolvedValueOnce(undefined);
-      const result = await User.get("test-email");
+      const result = await User.getByEmail("test-email");
       expect(result).toBe(null);
     });
   });

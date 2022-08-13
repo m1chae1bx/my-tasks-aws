@@ -282,6 +282,16 @@ describe("getByEmail", () => {
 
       expect(await UserDao.getByEmail(testUserInit.email)).toMatchSnapshot();
     });
+
+    it("should return undefined if not found", async () => {
+      (dynamoClient.query as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockResolvedValueOnce({
+          Items: undefined,
+        }),
+      });
+
+      expect(await UserDao.getByEmail(testUserInit.email)).toBe(undefined);
+    });
   });
 
   describe("sad path - DynamoDB get unknown error", () => {

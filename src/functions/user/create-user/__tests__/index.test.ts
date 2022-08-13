@@ -70,6 +70,24 @@ describe("create-user", () => {
     });
   });
 
+  describe("sad path - invalid request (no body)", () => {
+    let result: APIGatewayProxyResult;
+
+    beforeAll(async () => {
+      (validateRequest as unknown as jest.Mock).mockReturnValueOnce(false);
+      validateRequest.errors = validationErrors;
+      result = await handler({ ...createUserEvent, body: null });
+    });
+
+    it("should return a 400 response", () => {
+      expect(result.statusCode).toBe(400);
+    });
+
+    it("should return the validation errors", () => {
+      expect(result.body).toMatchSnapshot();
+    });
+  });
+
   describe("sad path - email unavailable", () => {
     let result: APIGatewayProxyResult;
 

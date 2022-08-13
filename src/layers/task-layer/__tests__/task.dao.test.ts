@@ -8,6 +8,7 @@ import { dynamoClient } from "/opt/nodejs/dynamo.config";
 import { CustomError, ErrorCode } from "/opt/nodejs/errors";
 import * as TaskDao from "../task.dao";
 import { isAWSError } from "/opt/nodejs/util";
+import { DueDate } from "../task.model";
 
 jest.mock("/opt/nodejs/dynamo.config", () => ({
   dynamoClient: {
@@ -96,15 +97,94 @@ describe("getAll", () => {
     });
   });
 
+  describe("happy path - not including completed", () => {
+    it("should return a list of tasks", async () => {
+      (dynamoClient.query as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockResolvedValueOnce({
+          Items: testTasks,
+        }),
+      });
+      const result = await TaskDao.getAll("test-list-id", {
+        ...getTasksQuery,
+        includeCompleted: undefined,
+      });
+      expect(result).toEqual(testTasks);
+    });
+  });
+
   describe("happy path - no items", () => {
     it("should return an empty list", async () => {
       (dynamoClient.query as jest.Mock).mockReturnValueOnce({
         promise: jest.fn().mockResolvedValueOnce({
-          Items: [],
+          Items: undefined,
         }),
       });
       const result = await TaskDao.getAll("test-list-id", getTasksQuery);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe("happy path - due date tomorrow", () => {
+    it("should call DynamoDB query", async () => {
+      jest.clearAllMocks();
+      (dynamoClient.query as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockResolvedValueOnce({
+          Items: testTasks,
+        }),
+      });
+      await TaskDao.getAll("test-list-id", {
+        ...getTasksQuery,
+        dueDate: DueDate.TOMORROW,
+      });
+      expect((dynamoClient.query as jest.Mock).mock.calls).toMatchSnapshot();
+    });
+  });
+
+  describe("happy path - due date upcoming", () => {
+    it("should call DynamoDB query", async () => {
+      jest.clearAllMocks();
+      (dynamoClient.query as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockResolvedValueOnce({
+          Items: testTasks,
+        }),
+      });
+      await TaskDao.getAll("test-list-id", {
+        ...getTasksQuery,
+        dueDate: DueDate.UPCOMING,
+      });
+      expect((dynamoClient.query as jest.Mock).mock.calls).toMatchSnapshot();
+    });
+  });
+
+  describe("happy path - due date overdue", () => {
+    it("should call DynamoDB query", async () => {
+      jest.clearAllMocks();
+      (dynamoClient.query as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockResolvedValueOnce({
+          Items: testTasks,
+        }),
+      });
+      await TaskDao.getAll("test-list-id", {
+        ...getTasksQuery,
+        dueDate: DueDate.OVERDUE,
+      });
+      expect((dynamoClient.query as jest.Mock).mock.calls).toMatchSnapshot();
+    });
+  });
+
+  describe("happy path - due date unplanned", () => {
+    it("should call DynamoDB query", async () => {
+      jest.clearAllMocks();
+      (dynamoClient.query as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockResolvedValueOnce({
+          Items: testTasks,
+        }),
+      });
+      await TaskDao.getAll("test-list-id", {
+        ...getTasksQuery,
+        dueDate: DueDate.UNPLANNED,
+      });
+      expect((dynamoClient.query as jest.Mock).mock.calls).toMatchSnapshot();
     });
   });
 });
@@ -193,6 +273,33 @@ describe("update", () => {
         await TaskDao.update(testTask);
       } catch (error) {
         expect(error).toMatchSnapshot();
+      }
+    });
+  });
+
+  describe("sad path - updating reopened task, task not found", () => {
+    it("should throw an error", async () => {
+      (dynamoClient.put as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockRejectedValueOnce({
+          code: "ConditionalCheckFailedException",
+        }),
+      });
+      (dynamoClient.transactWrite as jest.Mock).mockReturnValueOnce({
+        promise: jest.fn().mockRejectedValueOnce({
+          code: "ConditionalCheckFailedException",
+        }),
+      });
+      (isAWSError as unknown as jest.Mock).mockReturnValue(true);
+      jest
+        .spyOn(console, "error")
+        .mockClear()
+        .mockImplementationOnce(jest.fn());
+      try {
+        await TaskDao.update(testTask);
+      } catch (error) {
+        expect((error as CustomError).errorCode).toBe(
+          ErrorCode.TASK_NOT_FOUND_ERROR
+        );
       }
     });
   });

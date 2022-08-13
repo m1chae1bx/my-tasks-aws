@@ -186,7 +186,7 @@ describe("getAll", () => {
     it("should return an empty list", async () => {
       (dynamoClient.query as jest.Mock).mockReturnValueOnce({
         promise: jest.fn().mockResolvedValueOnce({
-          Items: [],
+          Items: undefined,
         }),
       });
       const result = await getAll(testList.userId);

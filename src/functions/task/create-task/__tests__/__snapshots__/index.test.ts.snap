@@ -4,4 +4,6 @@ exports[`create-task happy path should return a success message 1`] = `"{\\"mess
 
 exports[`create-task sad path - error while saving task should return the error message 1`] = `"test error"`;
 
+exports[`create-task sad path - invalid request (no body) should return the validation errors 1`] = `"{\\"message\\":\\"Bad request\\",\\"errors\\":[{\\"keyword\\":\\"\\",\\"instancePath\\":\\"\\",\\"schemaPath\\":\\"\\",\\"params\\":{},\\"message\\":\\"test error\\"}]}"`;
+
 exports[`create-task sad path - invalid request should return the validation errors 1`] = `"{\\"message\\":\\"Bad request\\",\\"errors\\":[{\\"keyword\\":\\"\\",\\"instancePath\\":\\"\\",\\"schemaPath\\":\\"\\",\\"params\\":{},\\"message\\":\\"test error\\"}]}"`;

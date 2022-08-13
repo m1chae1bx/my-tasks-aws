@@ -6,4 +6,6 @@ exports[`login sad path - generic error should return an error message 1`] = `"t
 
 exports[`login sad path - incorrect password should return an error message 1`] = `"{\\"message\\":\\"Password is incorrect\\"}"`;
 
+exports[`login sad path - invalid request (no body) should return errors 1`] = `"{\\"message\\":\\"Bad request\\",\\"errors\\":[{\\"keyword\\":\\"\\",\\"instancePath\\":\\"\\",\\"schemaPath\\":\\"\\",\\"params\\":{},\\"message\\":\\"test error\\"}]}"`;
+
 exports[`login sad path - invalid request should return errors 1`] = `"{\\"message\\":\\"Bad request\\",\\"errors\\":[{\\"keyword\\":\\"\\",\\"instancePath\\":\\"\\",\\"schemaPath\\":\\"\\",\\"params\\":{},\\"message\\":\\"test error\\"}]}"`;

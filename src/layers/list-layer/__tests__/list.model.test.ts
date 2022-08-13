@@ -12,11 +12,28 @@ jest.mock("../list.dao", () => ({
 describe("List", () => {
   describe("constructor", () => {
     it("should initialize a list", () => {
+      const { id, name, userId, isDefault } = testList;
+      const list = new List(name, userId, isDefault, id);
+      expect(list.id).toBe(id);
+      expect(list.name).toBe(name);
+      expect(list.userId).toBe(userId);
+      expect(list.isDefault).toBe(isDefault);
+    });
+
+    it("should initialize a list without id", () => {
       const { name, userId, isDefault } = testList;
       const list = new List(name, userId, isDefault);
       expect(list.name).toBe(name);
       expect(list.userId).toBe(userId);
       expect(list.isDefault).toBe(isDefault);
+    });
+
+    it("should initialize a list without isDefault", () => {
+      const { name, userId } = testList;
+      const list = new List(name, userId);
+      expect(list.name).toBe(name);
+      expect(list.userId).toBe(userId);
+      expect(list.isDefault).toBe(false);
     });
   });
 
