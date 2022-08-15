@@ -43,10 +43,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MyTasksTable
-      Layers:
-        - !Ref DynamoLayer
-        - !Ref UserLayer
-        - !Ref GenericLayer
       Events:
         GetUserApi:
           Type: Api
@@ -54,6 +50,14 @@ Resources:
             RestApiId: !Ref MyTasksApi
             Method: GET
             Path: /users/{userId}
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - index.ts
   CreateUserFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -62,10 +66,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MyTasksTable
-      Layers:
-        - !Ref DynamoLayer
-        - !Ref UserLayer
-        - !Ref GenericLayer
       Events:
         CreateUserApi:
           Type: Api
@@ -75,6 +75,14 @@ Resources:
             Path: /users
             Auth:
               Authorizer: NONE
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - index.ts
   PatchUserFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -83,10 +91,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MyTasksTable
-      Layers:
-        - !Ref DynamoLayer
-        - !Ref UserLayer
-        - !Ref GenericLayer
       Events:
         PatchUserApi:
           Type: Api
@@ -94,6 +98,14 @@ Resources:
             RestApiId: !Ref MyTasksApi
             Method: PATCH
             Path: /users/{userId}
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - index.ts
   DeleteUserFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -102,10 +114,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MyTasksTable
-      Layers:
-        - !Ref DynamoLayer
-        - !Ref UserLayer
-        - !Ref GenericLayer
       Events:
         DeleteUserApi:
           Type: Api
@@ -113,6 +121,14 @@ Resources:
             RestApiId: !Ref MyTasksApi
             Method: DELETE
             Path: /users/{userId}
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - index.ts
   ### AUTH RELATED RESOURCES ####
   LambdaAuthorizerFunction:
     Type: AWS::Serverless::Function
@@ -123,6 +139,14 @@ Resources:
         Variables:
           JWT_SECRET: !Ref JWTSecret
           ACCOUNT_ID: !Sub "${AWS::AccountId}"
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - index.ts
   LoginFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -134,10 +158,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MyTasksTable
-      Layers:
-        - !Ref DynamoLayer
-        - !Ref UserLayer
-        - !Ref GenericLayer
       Events:
         LoginApi:
           Type: Api
@@ -147,6 +167,14 @@ Resources:
             Path: /auth/signin
             Auth:
               Authorizer: NONE
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - index.ts
   #### LIST RELATED RESOURCES ####
   CreateListFunction:
     Type: AWS::Serverless::Function
@@ -156,10 +184,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MyTasksTable
-      Layers:
-        - !Ref DynamoLayer
-        - !Ref ListLayer
-        - !Ref GenericLayer
       Events:
         CreateListApi:
           Type: Api
@@ -167,6 +191,14 @@ Resources:
             RestApiId: !Ref MyTasksApi
             Method: POST
             Path: /users/{userId}/lists
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - index.ts
   GetListsFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -175,10 +207,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MyTasksTable
-      Layers:
-        - !Ref DynamoLayer
-        - !Ref ListLayer
-        - !Ref GenericLayer
       Events:
         GetListsApi:
           Type: Api
@@ -186,6 +214,14 @@ Resources:
             RestApiId: !Ref MyTasksApi
             Method: GET
             Path: /users/{userId}/lists/
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - index.ts
   DeleteListFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -194,10 +230,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MyTasksTable
-      Layers:
-        - !Ref DynamoLayer
-        - !Ref ListLayer
-        - !Ref GenericLayer
       Events:
         DeleteListApi:
           Type: Api
@@ -205,6 +237,14 @@ Resources:
             RestApiId: !Ref MyTasksApi
             Method: DELETE
             Path: /users/{userId}/lists/{listId}
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - index.ts
   #### TASK RELATED RESOURCES ####
   CreateTaskFunction:
     Type: AWS::Serverless::Function
@@ -214,10 +254,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MyTasksTable
-      Layers:
-        - !Ref DynamoLayer
-        - !Ref TaskLayer
-        - !Ref GenericLayer
       Events:
         CreateTaskApi:
           Type: Api
@@ -225,6 +261,14 @@ Resources:
             RestApiId: !Ref MyTasksApi
             Method: POST
             Path: /lists/{listId}/tasks
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - index.ts
   GetTasksFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -233,10 +277,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MyTasksTable
-      Layers:
-        - !Ref DynamoLayer
-        - !Ref TaskLayer
-        - !Ref GenericLayer
       Events:
         GetTasksApi:
           Type: Api
@@ -244,6 +284,14 @@ Resources:
             RestApiId: !Ref MyTasksApi
             Method: GET
             Path: /lists/{listId}/tasks/
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - index.ts
   UpdateTaskFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -252,10 +300,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MyTasksTable
-      Layers:
-        - !Ref DynamoLayer
-        - !Ref TaskLayer
-        - !Ref GenericLayer
       Events:
         UpdateTaskApi:
           Type: Api
@@ -263,6 +307,14 @@ Resources:
             RestApiId: !Ref MyTasksApi
             Method: PUT
             Path: /lists/{listId}/tasks/{taskId}
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - index.ts
   DeleteTaskFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -271,10 +323,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MyTasksTable
-      Layers:
-        - !Ref DynamoLayer
-        - !Ref TaskLayer
-        - !Ref GenericLayer
       Events:
         DeleteTaskApi:
           Type: Api
@@ -282,57 +330,14 @@ Resources:
             RestApiId: !Ref MyTasksApi
             Method: DELETE
             Path: /lists/{listId}/tasks/{taskId}
-  ### LAYERS ###
-  DynamoLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: DynamoLayer
-      Description: Dependency for DynamoDB related functions
-      ContentUri: layers/dynamo-layer
-      CompatibleRuntimes:
-        - nodejs14.x
     Metadata:
-      BuildMethod: nodejs14.x
-  ListLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: ListLayer
-      Description: Dependency for List Model related functions
-      ContentUri: layers/list-layer
-      CompatibleRuntimes:
-        - nodejs14.x
-    Metadata:
-      BuildMethod: nodejs14.x
-  TaskLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: TaskLayer
-      Description: Dependency for Task Model related functions
-      ContentUri: layers/task-layer
-      CompatibleRuntimes:
-        - nodejs14.x
-    Metadata:
-      BuildMethod: nodejs14.x
-  UserLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: UserLayer
-      Description: Dependency for User Model related functions
-      ContentUri: layers/user-layer
-      CompatibleRuntimes:
-        - nodejs14.x
-    Metadata:
-      BuildMethod: nodejs14.x
-  GenericLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: GenericLayer
-      Description: Dependency for Generic functions
-      ContentUri: layers/generic-layer
-      CompatibleRuntimes:
-        - nodejs14.x
-    Metadata:
-      BuildMethod: nodejs14.x
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - index.ts
   ### DATA STORAGE ###
   MyTasksTable:
     Type: AWS::DynamoDB::Table

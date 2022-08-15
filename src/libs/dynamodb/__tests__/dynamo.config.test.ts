@@ -1,5 +1,5 @@
-import { getTableName } from "../dynamo.config";
-import { EnvironmentConfigError } from "/opt/nodejs/errors";
+import { getTableName } from "@libs/dynamodb";
+import { EnvironmentConfigError } from "@libs/generic/errors";
 
 describe("getTableName", () => {
   describe("happy path", () => {

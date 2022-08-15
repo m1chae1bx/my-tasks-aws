@@ -1,6 +1,6 @@
-import { User } from "/opt/nodejs/user.model";
+import { User } from "@libs/user";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { genericErrorHandler } from "/opt/nodejs/util";
+import { genericErrorHandler } from "@libs/generic/util";
 import { validateRequest } from "./model";
 
 export const handler = async (

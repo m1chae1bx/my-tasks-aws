@@ -1,10 +1,10 @@
 import { create, deleteList, getAll } from "../list.dao";
 import { testList, testLists } from "../test-data";
-import { dynamoClient } from "/opt/nodejs/dynamo.config";
-import { ErrorCode } from "/opt/nodejs/errors";
-import { isAWSError } from "/opt/nodejs/util";
+import { dynamoClient } from "@libs/dynamodb";
+import { ErrorCode } from "@libs/generic/errors";
+import { isAWSError } from "@libs/generic/util";
 
-jest.mock("/opt/nodejs/dynamo.config", () => ({
+jest.mock("@libs/dynamodb", () => ({
   dynamoClient: {
     transactWrite: jest.fn(),
     put: jest.fn(),
@@ -14,7 +14,7 @@ jest.mock("/opt/nodejs/dynamo.config", () => ({
   getTableName: jest.fn().mockReturnValue("test-table-name"),
 }));
 
-jest.mock("/opt/nodejs/util", () => ({
+jest.mock("@libs/generic/util", () => ({
   isAWSError: jest.fn(),
   uuid: jest.fn().mockReturnValue("test-list-id"),
 }));

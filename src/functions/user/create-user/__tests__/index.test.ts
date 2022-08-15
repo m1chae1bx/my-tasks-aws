@@ -6,20 +6,20 @@ import {
   testUser,
   validationErrors,
 } from "../test-data/create-user-event";
-import { UsernameUnavailableError } from "/opt/nodejs/errors";
-import { User } from "/opt/nodejs/user.model";
-import { genericErrorHandler } from "/opt/nodejs/util";
+import { UsernameUnavailableError } from "@libs/generic/errors";
+import { User } from "@libs/user";
+import { genericErrorHandler } from "@libs/generic/util";
 
 jest.mock("../model", () => ({
   validateRequest: jest.fn(),
 }));
 
-jest.mock("/opt/nodejs/user.model", () => ({
-  ...jest.requireActual("/opt/nodejs/user.model"),
+jest.mock("@libs/user", () => ({
+  ...jest.requireActual("@libs/user"),
   User: jest.fn(),
 }));
 
-jest.mock("/opt/nodejs/util", () => ({
+jest.mock("@libs/generic/util", () => ({
   genericErrorHandler: jest.fn(),
 }));
 

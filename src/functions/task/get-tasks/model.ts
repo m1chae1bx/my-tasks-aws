@@ -1,5 +1,5 @@
-import { DueDate, GetTasksQuery } from "/opt/nodejs/task.model";
-import { JSONSchemaType, ajv } from "/opt/nodejs/util";
+import { DueDate, GetTasksQuery } from "@libs/task";
+import { JSONSchemaType, ajv } from "@libs/generic/util";
 
 export interface GetTasksRequest {
   pathParameters: {

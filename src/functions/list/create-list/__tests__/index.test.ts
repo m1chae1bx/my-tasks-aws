@@ -3,18 +3,18 @@ import { APIGatewayProxyResult } from "aws-lambda";
 import { handler } from "../index";
 import { validateRequest } from "../model";
 import { createListEvent } from "../test-data/create-list-event";
-import { List } from "/opt/nodejs/list.model";
-import { genericErrorHandler } from "/opt/nodejs/util";
+import { List } from "@libs/list";
+import { genericErrorHandler } from "@libs/generic/util";
 
 jest.mock("../model", () => ({
   validateRequest: jest.fn(),
 }));
 
-jest.mock("/opt/nodejs/list.model", () => ({
+jest.mock("@libs/list", () => ({
   List: jest.fn(),
 }));
 
-jest.mock("/opt/nodejs/util", () => ({
+jest.mock("@libs/generic/util", () => ({
   genericErrorHandler: jest.fn(),
 }));
 

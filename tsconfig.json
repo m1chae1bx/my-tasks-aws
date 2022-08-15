@@ -14,12 +14,12 @@
     "skipLibCheck": true,
     "baseUrl": "src",
     "paths": {
-      "/opt/nodejs/dynamo.config": ["layers/dynamo-layer/dynamo.config"],
-      "/opt/nodejs/user.model": ["layers/user-layer/user.model"],
-      "/opt/nodejs/list.model": ["layers/list-layer/list.model"],
-      "/opt/nodejs/task.model": ["layers/task-layer/task.model"],
-      "/opt/nodejs/util": ["layers/generic-layer/util"],
-      "/opt/nodejs/errors": ["layers/generic-layer/errors"],
+      "@libs/dynamodb": ["libs/dynamodb/index"],
+      "@libs/user": ["libs/user/index"],
+      "@libs/list": ["libs/list/index"],
+      "@libs/task": ["libs/task/index"],
+      "@libs/generic/util": ["libs/generic/util"],
+      "@libs/generic/errors": ["libs/generic/errors"],
       "@test-utils/*": ["test-utils/*"]
     }
   },

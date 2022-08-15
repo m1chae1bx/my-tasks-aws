@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { validateRequest } from "./model";
-import { List } from "/opt/nodejs/list.model";
-import { genericErrorHandler } from "/opt/nodejs/util";
+import { List } from "@libs/list";
+import { genericErrorHandler } from "@libs/generic/util";
 
 export const handler = async (
   event: APIGatewayProxyEvent

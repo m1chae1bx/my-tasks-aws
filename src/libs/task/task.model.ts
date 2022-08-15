@@ -1,5 +1,5 @@
 import { create, deleteTask, getAll, update } from "./task.dao";
-import { RequiredPropertyMissingError } from "/opt/nodejs/errors";
+import { RequiredPropertyMissingError } from "@libs/generic/errors";
 
 export interface TaskDetails {
   id?: string;
@@ -54,7 +54,7 @@ export class Task implements TaskDetails {
 
   static getAll = async (
     listId: string,
-    query: GetTasksQuery
+    query: GetTasksQuery | null
   ): Promise<TaskDetails[]> => {
     return getAll(listId, query);
   };

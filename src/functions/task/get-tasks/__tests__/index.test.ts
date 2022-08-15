@@ -4,20 +4,20 @@ import { handler } from "..";
 import { validateRequest } from "../model";
 import { getTasksEvent } from "../test-data/get-task-event";
 import { testTasks } from "../test-data/test-tasks";
-import { Task } from "/opt/nodejs/task.model";
-import { genericErrorHandler } from "/opt/nodejs/util";
+import { Task } from "@libs/task";
+import { genericErrorHandler } from "@libs/generic/util";
 
 jest.mock("../model", () => ({
   validateRequest: jest.fn(),
 }));
 
-jest.mock("/opt/nodejs/task.model", () => ({
+jest.mock("@libs/task", () => ({
   Task: {
     getAll: jest.fn(),
   },
 }));
 
-jest.mock("/opt/nodejs/util", () => ({
+jest.mock("@libs/generic/util", () => ({
   genericErrorHandler: jest.fn(),
 }));
 

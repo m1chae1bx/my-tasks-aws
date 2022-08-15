@@ -2,21 +2,21 @@ import { APIGatewayProxyResult } from "aws-lambda";
 import { handler } from "../index";
 import { validateRequest } from "../model";
 import { deleteUserEvent } from "../test-data/delete-user-event";
-import { User } from "/opt/nodejs/user.model";
+import { User } from "@libs/user";
 import { ajvError } from "@test-utils/base-objects";
-import { genericErrorHandler } from "/opt/nodejs/util";
+import { genericErrorHandler } from "@libs/generic/util";
 
 jest.mock("../model", () => ({
   validateRequest: jest.fn(),
 }));
 
-jest.mock("/opt/nodejs/user.model", () => ({
+jest.mock("@libs/user", () => ({
   User: {
     get: jest.fn(),
   },
 }));
 
-jest.mock("/opt/nodejs/util", () => ({
+jest.mock("@libs/generic/util", () => ({
   genericErrorHandler: jest.fn(),
 }));
 

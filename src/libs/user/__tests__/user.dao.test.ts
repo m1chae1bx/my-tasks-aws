@@ -1,15 +1,15 @@
 import { conditionalCheckFailedException } from "@test-utils/base-objects";
 import { testUserInit } from "../test-data/test-user-init";
-import { dynamoClient } from "/opt/nodejs/dynamo.config";
+import { dynamoClient } from "@libs/dynamodb";
 import {
   EnvironmentConfigError,
   ErrorCode,
   RequiredPropertyMissingError,
   UserNotFoundError,
-} from "/opt/nodejs/errors";
+} from "@libs/generic/errors";
 import * as UserDao from "../user.dao";
 
-jest.mock("/opt/nodejs/dynamo.config", () => ({
+jest.mock("@libs/dynamodb", () => ({
   dynamoClient: {
     put: jest.fn(),
     delete: jest.fn(),
@@ -92,7 +92,7 @@ describe("deleteUser", () => {
       (dynamoClient.delete as jest.Mock).mockReturnValueOnce({
         promise: jest.fn().mockResolvedValueOnce(null),
       });
-      const dynamoConfig = await import("/opt/nodejs/dynamo.config");
+      const dynamoConfig = await import("@libs/dynamodb");
 
       await UserDao.deleteUser(testUserInit.id);
       expect((dynamoClient.delete as jest.Mock).mock.calls).toMatchSnapshot();
@@ -158,7 +158,7 @@ describe("patch", () => {
       (dynamoClient.update as jest.Mock).mockReturnValueOnce({
         promise: jest.fn().mockResolvedValueOnce(null),
       });
-      const dynamoConfig = await import("/opt/nodejs/dynamo.config");
+      const dynamoConfig = await import("@libs/dynamodb");
 
       await UserDao.patch(testUserInit);
       expect((dynamoClient.update as jest.Mock).mock.calls).toMatchSnapshot();
