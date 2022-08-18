@@ -14,6 +14,7 @@ My Tasks AWS is a REST API backend application that supports creation, modificat
 my-tasks-aws
 ├─ .github
 │  └─ workflows/
+│     └─ pipeline.yaml
 ├─ src/
 │  ├─ libs/
 │  ├─ test-utils/
@@ -35,5 +36,23 @@ my-tasks-aws
 ├─ .eslintignore
 └─ README.md
 ```
+
+File/Directory                    | Description
+----------------------------------|-------------
+`.github/workflows/pipeline.yaml` | Github CI/CD pipeline configuration
+`src/libs/`                       | Shared code used by various functions
+`src/test-utils/`                 | Shared utility code for unit tests
+`src/functions/.../index.ts`      | Lambda function entry point
+`src/functions/.../__tests__/`    | Function related unit tests
+`src/functions/.../test-data/`    | Mock data for unit tests
+`template.yml `                   | Template file used to define resources AWS SAM resources
+`package.json`                    | NPM project manifest file
+`tsconfig.json`                   | TypeScript configuration
+`jest.config.json`                | Jest unit test framework configuration
+`.gitignore`                      | List of files/directories ignored by Git
+`.prettierrc.json`                | Prettier configuration
+`.eslintignore`                   | List of files/directories ignored by TS/JS linter
+`README.md`                       | Readme file
+
 
 More details to come soon.
