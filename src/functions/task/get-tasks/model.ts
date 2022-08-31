@@ -45,7 +45,14 @@ export const getTasksRequestSchema: JSONSchemaType<GetTasksRequest> = {
         },
       },
       nullable: true,
-      if: { properties: { dueDate: { type: "string" } } },
+      if: {
+        properties: {
+          dueDate: {
+            enum: Object.values(DueDate),
+          },
+        },
+        required: ["dueDate"],
+      },
       then: { required: ["today"] },
     },
   },
